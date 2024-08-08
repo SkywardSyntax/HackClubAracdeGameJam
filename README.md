@@ -1,13 +1,33 @@
-# GitHub Codespaces ♥️ Next.js
+# Loopholes Game
 
-Welcome to your shiny new Codespace running Next.js! We've got everything fired up and running for you to explore Next.js.
+Welcome to the Loopholes Game! This is a fun and interactive game where you need to find and click on loopholes that appear randomly on the screen. The more loopholes you find, the higher your score!
 
-You've got a blank canvas to work on from a git perspective as well. There's a single initial commit with the what you're seeing right now - where you go from here is up to you!
+## How to Play
 
-Everything you do here is contained within this one codespace. There is no repository on GitHub yet. If and when you’re ready you can click "Publish Branch" and we’ll create your repository and push up your project. If you were just exploring then and have no further need for this code then you can simply delete your codespace and it's gone forever.
+1. Click the "Create Loophole" button to generate a loophole on the screen.
+2. Click on the loophole as quickly as possible to score points.
+3. The game lasts for 60 seconds. Try to score as many points as you can before the time runs out!
 
-To run this application:
+## Running the Game
 
-```
-npm run dev
-```
+To run this application locally, follow these steps:
+
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+
+2. Install the dependencies:
+   ```
+   npm install
+   ```
+
+3. Start the development server:
+   ```
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000` to play the game.
+
+Have fun and enjoy the Loopholes Game!
