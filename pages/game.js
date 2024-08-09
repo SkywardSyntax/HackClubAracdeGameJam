@@ -1,17 +1,101 @@
-import { useEffect } from 'react';
-import { mat4, mat3 } from 'gl-matrix';
+import { useEffect, useState } from 'react';
+import { mat4, mat3, vec3 } from 'gl-matrix';
 
 function Game() {
+  const [astronaut, setAstronaut] = useState({ x: 0, y: 0, vx: 0, vy: 0 });
+  const [gold, setGold] = useState([]);
+  const [debris, setDebris] = useState([]);
+  const [blackHole, setBlackHole] = useState({ x: 0, y: 0, pullStrength: 0.01 });
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      let blackHole;
-      let astronaut;
-      let trash = [];
-      let gold = [];
-      let pullStrength = 0.01;
+      const handleKeyDown = (event) => {
+        switch (event.key) {
+          case 'ArrowUp':
+            setAstronaut((prev) => ({ ...prev, vy: prev.vy - 0.1 }));
+            break;
+          case 'ArrowDown':
+            setAstronaut((prev) => ({ ...prev, vy: prev.vy + 0.1 }));
+            break;
+          case 'ArrowLeft':
+            setAstronaut((prev) => ({ ...prev, vx: prev.vx - 0.1 }));
+            break;
+          case 'ArrowRight':
+            setAstronaut((prev) => ({ ...prev, vx: prev.vx + 0.1 }));
+            break;
+          default:
+            break;
+        }
+      };
 
-      let blackHoleShader;
-      let astronautShader;
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      let animationFrameId;
+
+      const update = () => {
+        setAstronaut((prev) => {
+          const dx = blackHole.x - prev.x;
+          const dy = blackHole.y - prev.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const force = blackHole.pullStrength / (distance * distance);
+          const ax = force * dx / distance;
+          const ay = force * dy / distance;
+
+          return {
+            x: prev.x + prev.vx,
+            y: prev.y + prev.vy,
+            vx: prev.vx + ax,
+            vy: prev.vy + ay,
+          };
+        });
+
+        setGold((prev) =>
+          prev.filter((g) => {
+            const dx = g.x - astronaut.x;
+            const dy = g.y - astronaut.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance > 1;
+          })
+        );
+
+        setDebris((prev) =>
+          prev.filter((d) => {
+            const dx = d.x - astronaut.x;
+            const dy = d.y - astronaut.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance > 1;
+          })
+        );
+
+        animationFrameId = requestAnimationFrame(update);
+      };
+
+      update();
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+      };
+    }
+  }, [astronaut, blackHole]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const canvas = document.createElement('canvas');
+      document.body.appendChild(canvas);
+      const gl = canvas.getContext('webgl');
+
+      if (!gl) {
+        console.error('WebGL not supported');
+        return;
+      }
 
       const vertexShaderSource = `
         attribute vec4 a_position;
@@ -144,15 +228,6 @@ function Game() {
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       };
-
-      const canvas = document.createElement('canvas');
-      document.body.appendChild(canvas);
-      const gl = canvas.getContext('webgl');
-
-      if (!gl) {
-        console.error('WebGL not supported');
-        return;
-      }
 
       sketch(gl);
 
