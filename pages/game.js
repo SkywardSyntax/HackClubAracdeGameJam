@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { mat4, mat3 } from 'gl-matrix';
 
 function Game() {
   useEffect(() => {
