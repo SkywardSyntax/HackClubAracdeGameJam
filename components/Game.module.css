@@ -29,18 +29,9 @@ button.btn {
   overflow: hidden;
 }
 
-.loophole {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: red;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
 .game-container {
   background-color: black;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   position: relative;
   overflow: hidden;
@@ -51,14 +42,14 @@ button.btn {
   width: 50px;
   height: 50px;
   background-color: white;
-  border-radius: 50%;
+  border-radius: 0%;
 }
 
 .black-hole {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  background-color: black;
+  width: 200px;
+  height: 200px;
+  background-color: gray;
   border-radius: 50%;
   box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.5);
 }
@@ -67,7 +58,7 @@ button.btn {
   position: absolute;
   width: 20px;
   height: 20px;
-  background-color: gold;
+  background-color: yellow;
   border-radius: 50%;
 }
 
@@ -75,6 +66,6 @@ button.btn {
   position: absolute;
   width: 20px;
   height: 20px;
-  background-color: gray;
+  background-color: brown;
   border-radius: 50%;
 }
