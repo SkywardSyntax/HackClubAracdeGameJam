@@ -24,3 +24,9 @@ In this game, you control an astronaut who is trying to escape the black hole's 
 
 - Collect gold to score points.
 - Avoid debris to stay alive.
+
+## Additional Information
+
+- The game uses WebGL for rendering the game elements.
+- The astronaut's movement is affected by the black hole's gravity and friction.
+- Collision detection is implemented for gold and debris.

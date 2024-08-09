@@ -12,3 +12,8 @@ body {
   text-rendering: optimizeLegibility;
   hyphens: auto;
 }
+
+canvas {
+  display: block;
+  background-color: black;
+}

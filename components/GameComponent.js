@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { mat4, mat3, vec3 } from 'gl-matrix';
-import GameComponent from '../components/GameComponent';
+import styles from './Game.module.css';
 
-function Game() {
+function GameComponent() {
   const [astronaut, setAstronaut] = useState({ x: 0, y: 0, vx: 0, vy: 0 });
   const [gold, setGold] = useState([]);
   const [debris, setDebris] = useState([]);
@@ -95,8 +95,6 @@ function Game() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = 600;
       document.body.appendChild(canvas);
       const gl = canvas.getContext('webgl');
 
@@ -252,7 +250,18 @@ function Game() {
     }
   }, []);
 
-  return <GameComponent />;
+  return (
+    <div className={styles.gameContainer}>
+      <div className={styles.astronaut} style={{ left: astronaut.x, top: astronaut.y }}></div>
+      <div className={styles.blackHole} style={{ left: blackHole.x, top: blackHole.y }}></div>
+      {gold.map((g, index) => (
+        <div key={index} className={styles.gold} style={{ left: g.x, top: g.y }}></div>
+      ))}
+      {debris.map((d, index) => (
+        <div key={index} className={styles.debris} style={{ left: d.x, top: d.y }}></div>
+      ))}
+    </div>
+  );
 }
 
-export default Game;
+export default GameComponent;
