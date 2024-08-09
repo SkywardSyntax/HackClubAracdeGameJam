@@ -1,32 +1,25 @@
-# Black Hole Game
+# Black Hole Animation
 
-Welcome to the Black Hole Game! This is an exciting and challenging game where you need to navigate an astronaut and collect gold while avoiding trash. The black hole in the center pulls everything towards it, making the game more thrilling!
+Welcome to the Black Hole Animation! This is an exciting and visually stunning animation of a black hole with realistic lighting on a black background.
 
-## Running the Game
+## Running the Animation
 
-To run the game, ensure you are in a browser environment. The game relies on the `window` object, which is only available in browsers.
+To run the animation, ensure you are in a browser environment. The animation relies on the `window` object, which is only available in browsers.
 
-Note: The game must be run in a browser environment to function correctly.
+Note: The animation must be run in a browser environment to function correctly.
 
-## Game Description
+## Animation Description
 
-In this game, you control an astronaut who is trying to escape the black hole's gravity at the center of the screen. There is debris flying into the black hole, and also gold flying into the black hole. The objective is to collect the gold and avoid the debris. The game features realistic physics regarding object collisions and inertia, with an exception that the astronaut can move fast enough to evade the black hole's gravity.
+In this animation, a black hole with realistic lighting effects and textures is rendered on a black background. The animation showcases the mesmerizing and captivating nature of a black hole.
 
 ## Controls
 
-- Use the arrow keys to move the astronaut:
-  - Up Arrow: Move up
-  - Down Arrow: Move down
-  - Left Arrow: Move left
-  - Right Arrow: Move right
+- There are no controls for this animation. Just sit back and enjoy the visual experience.
 
 ## Objective
 
-- Collect gold to score points.
-- Avoid debris to stay alive.
+- The objective is to provide a visually stunning and realistic animation of a black hole with realistic lighting on a black background.
 
 ## Additional Information
 
-- The game uses WebGL for rendering the game elements.
-- The astronaut's movement is affected by the black hole's gravity and friction.
-- Collision detection is implemented for gold and debris.
+- The animation uses WebGL for rendering the black hole and its lighting effects.
