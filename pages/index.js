@@ -1,15 +1,13 @@
-import Game from '../components/Game'
-import Link from 'next/link'
+import Link from 'next/link';
 
 function Home() {
   return (
     <main>
-      <Game />
-      <Link href="/game">
-        Play the Black Hole Game
+      <Link href="/game" legacyBehavior>
+        <a>Play Game</a>
       </Link>
     </main>
-  )
+  );
 }
 
-export default Home
+export default Home;
