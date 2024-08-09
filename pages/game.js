@@ -49,11 +49,16 @@ function Game() {
           const ax = force * dx / distance;
           const ay = force * dy / distance;
 
+          // Apply friction
+          const friction = 0.99;
+          const newVx = prev.vx * friction;
+          const newVy = prev.vy * friction;
+
           return {
-            x: prev.x + prev.vx,
-            y: prev.y + prev.vy,
-            vx: prev.vx + ax,
-            vy: prev.vy + ay,
+            x: prev.x + newVx,
+            y: prev.y + newVy,
+            vx: newVx + ax,
+            vy: newVy + ay,
           };
         });
 
@@ -106,10 +111,12 @@ function Game() {
         uniform vec3 u_lightPosition;
         varying vec3 v_normal;
         varying vec3 v_lightDirection;
+        varying vec3 v_viewDirection;
         void main() {
           vec4 vertexPosition = u_modelViewMatrix * a_position;
           v_normal = u_normalMatrix * a_normal;
           v_lightDirection = u_lightPosition - vertexPosition.xyz;
+          v_viewDirection = -vertexPosition.xyz;
           gl_Position = u_projectionMatrix * vertexPosition;
         }
       `;
@@ -118,17 +125,22 @@ function Game() {
         precision mediump float;
         varying vec3 v_normal;
         varying vec3 v_lightDirection;
+        varying vec3 v_viewDirection;
         uniform vec3 u_lightColor;
         uniform vec3 u_ambientLight;
         uniform sampler2D u_texture;
         void main() {
           vec3 normal = normalize(v_normal);
           vec3 lightDirection = normalize(v_lightDirection);
+          vec3 viewDirection = normalize(v_viewDirection);
           float diff = max(dot(normal, lightDirection), 0.0);
           vec3 diffuse = diff * u_lightColor;
           vec3 ambient = u_ambientLight;
+          vec3 reflectDirection = reflect(-lightDirection, normal);
+          float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32.0);
+          vec3 specular = spec * u_lightColor;
           vec4 textureColor = texture2D(u_texture, gl_FragCoord.xy / 512.0);
-          vec3 finalColor = (ambient + diffuse) * textureColor.rgb;
+          vec3 finalColor = (ambient + diffuse + specular) * textureColor.rgb;
           gl_FragColor = vec4(finalColor, 1.0);
         }
       `;
