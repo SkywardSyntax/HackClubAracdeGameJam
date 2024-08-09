@@ -23,3 +23,6 @@ In this animation, a black hole with realistic lighting effects and textures is 
 ## Additional Information
 
 - The animation uses WebGL for rendering the black hole and its lighting effects.
+- The animation now includes a realistic twisting of light around the black hole's borders.
+- The black hole is now visible.
+- The black hole now has a border.
