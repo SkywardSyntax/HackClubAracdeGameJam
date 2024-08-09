@@ -10,7 +10,7 @@ Note: The animation must be run in a browser environment to function correctly.
 
 ## Animation Description
 
-In this animation, a black hole with realistic lighting effects and textures is rendered on a black background. The animation showcases the mesmerizing and captivating nature of a black hole.
+In this animation, a black hole with advanced and sophisticated lighting techniques, including ray tracing and complex light interactions, is rendered on a black background. The animation showcases the mesmerizing and captivating nature of a black hole. The light bending effect around the black hole is implemented using WebGL shaders.
 
 ## Controls
 
@@ -18,7 +18,7 @@ In this animation, a black hole with realistic lighting effects and textures is 
 
 ## Objective
 
-- The objective is to provide a visually stunning and realistic animation of a black hole with realistic lighting on a black background.
+- The objective is to provide a visually stunning and realistic animation of a black hole with advanced lighting techniques on a black background.
 
 ## Additional Information
 
@@ -26,3 +26,5 @@ In this animation, a black hole with realistic lighting effects and textures is 
 - The animation now includes a realistic twisting of light around the black hole's borders.
 - The black hole is now visible.
 - The black hole now has a border.
+- The black hole now has a glowing effect around its edges.
+- The WebGL shaders include advanced techniques like gravitational lensing and relativistic effects.

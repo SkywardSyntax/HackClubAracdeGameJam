@@ -76,6 +76,14 @@ function GameComponent() {
           vec4 twistedTextureColor = texture2D(u_texture, twistedTexCoord);
           finalColor = mix(finalColor, twistedTextureColor.rgb, twistFactor);
 
+          // Gravitational Lensing
+          float lensingFactor = 1.0 / (1.0 + distance * distance);
+          finalColor *= lensingFactor;
+
+          // Relativistic Effects
+          float relativisticFactor = 1.0 / sqrt(1.0 - distance * distance);
+          finalColor *= relativisticFactor;
+
           gl_FragColor = vec4(finalColor, 1.0);
         }
       `;
@@ -219,7 +227,7 @@ function GameComponent() {
   }, []);
 
   return (
-    <div>
+    <div className={styles.gameContainer}>
       <div className={styles.blackHole}></div>
       <div className={styles.blackHoleGlow}></div>
     </div>

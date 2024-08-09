@@ -11,10 +11,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   hyphens: auto;
-  background-color: black;
+  background-color: #d3d3d3;
 }
 
 canvas {
   display: block;
-  background-color: black;
+  background-color: #d3d3d3;
+  z-index: 1;
+}
+
+.black-hole {
+  z-index: 2;
 }

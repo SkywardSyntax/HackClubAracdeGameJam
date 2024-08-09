@@ -8,6 +8,7 @@ function Game() {
       const canvas = document.createElement('canvas');
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      canvas.style.backgroundColor = '#d3d3d3';
       document.body.appendChild(canvas);
       const gl = canvas.getContext('webgl');
 
@@ -65,6 +66,24 @@ function Game() {
           // Ambient Occlusion
           float ao = texture2D(u_parallaxMap, v_texCoord).r;
           finalColor *= ao;
+
+          // Light Twisting Effect
+          float distance = length(v_texCoord - vec2(0.5, 0.5));
+          float twistFactor = 1.0 - smoothstep(0.4, 0.5, distance);
+          vec2 twistedTexCoord = vec2(
+            cos(twistFactor * 3.14159) * (v_texCoord.x - 0.5) - sin(twistFactor * 3.14159) * (v_texCoord.y - 0.5) + 0.5,
+            sin(twistFactor * 3.14159) * (v_texCoord.x - 0.5) + cos(twistFactor * 3.14159) * (v_texCoord.y - 0.5) + 0.5
+          );
+          vec4 twistedTextureColor = texture2D(u_texture, twistedTexCoord);
+          finalColor = mix(finalColor, twistedTextureColor.rgb, twistFactor);
+
+          // Gravitational Lensing
+          float lensingFactor = 1.0 / (1.0 + distance * distance);
+          finalColor *= lensingFactor;
+
+          // Relativistic Effects
+          float relativisticFactor = 1.0 / sqrt(1.0 - distance * distance);
+          finalColor *= relativisticFactor;
 
           gl_FragColor = vec4(finalColor, 1.0);
         }
