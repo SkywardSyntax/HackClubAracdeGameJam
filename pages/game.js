@@ -5,15 +5,23 @@ import GameComponent from '../components/GameComponent';
 function Game() {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [gameWon, setGameWon] = useState(false);
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
   const startGame = () => {
     setGameStarted(true);
     setGameOver(false);
+    setGameWon(false);
+    setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   };
 
   const handleGameOver = () => {
     setGameOver(true);
+    setGameStarted(false);
+  };
+
+  const handleGameWin = () => {
+    setGameWon(true);
     setGameStarted(false);
   };
 
@@ -34,17 +42,106 @@ function Game() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const checkGameWin = () => {
+      if (ivorySquarePosition.y <= 0) {
+        handleGameWin();
+      }
+    };
+
+    const interval = setInterval(checkGameWin, 100);
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition]);
+
+  useEffect(() => {
+    const checkGameOver = () => {
+      // Assuming holes are available in the GameComponent
+      const holes = document.querySelectorAll(`.${styles.blackHole}`);
+      for (let hole of holes) {
+        const holeRect = hole.getBoundingClientRect();
+        if (
+          ivorySquarePosition.x >= holeRect.left &&
+          ivorySquarePosition.x <= holeRect.right &&
+          ivorySquarePosition.y >= holeRect.top &&
+          ivorySquarePosition.y <= holeRect.bottom
+        ) {
+          handleGameOver();
+          return;
+        }
+      }
+    };
+
+    const interval = setInterval(checkGameOver, 100);
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition]);
+
+  useEffect(() => {
+    const handleGameReset = () => {
+      const currentTime = Date.now();
+      if (currentTime - lastResetTime < 60000) {
+        handleGameOver();
+      } else {
+        setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        setLastResetTime(currentTime);
+      }
+    };
+
+    const interval = setInterval(() => {
+      // Assuming holes are available in the GameComponent
+      const holes = document.querySelectorAll(`.${styles.blackHole}`);
+      for (let hole of holes) {
+        const holeRect = hole.getBoundingClientRect();
+        if (
+          ivorySquarePosition.x >= holeRect.left &&
+          ivorySquarePosition.x <= holeRect.right &&
+          ivorySquarePosition.y >= holeRect.top &&
+          ivorySquarePosition.y <= holeRect.bottom
+        ) {
+          handleGameReset();
+          return;
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleGameStart = () => {
+        setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        setLastResetTime(Date.now());
+      };
+
+      handleGameStart();
+    }
+  }, []);
+
   return (
     <div className={styles.desertBackground}>
-      {!gameStarted && !gameOver && (
+      {!gameStarted && !gameOver && !gameWon && (
         <button onClick={startGame} className={styles.startButton}>
           Start Game
         </button>
       )}
-      {gameStarted && <GameComponent onGameOver={handleGameOver} />}
+      {gameStarted && <GameComponent onGameOver={handleGameOver} onGameWin={handleGameWin} />}
       {gameOver && (
         <div className={styles.gameOverMessage}>
           Game Over
+        </div>
+      )}
+      {gameWon && (
+        <div className={styles.winMessage}>
+          You Win!
         </div>
       )}
     </div>

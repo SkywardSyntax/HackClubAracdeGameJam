@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './Game.module.css';
 
-function GameComponent() {
+function GameComponent({ onGameOver, onGameWin }) {
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const [holes, setHoles] = useState(generateHoles());
   const [lastResetTime, setLastResetTime] = useState(Date.now());
@@ -35,6 +35,83 @@ function GameComponent() {
 
     return () => clearInterval(interval);
   }, [velocity]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPlayerPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const checkGameOver = () => {
+      for (let hole of holes) {
+        if (
+          ivorySquarePosition.x >= hole.x &&
+          ivorySquarePosition.x <= hole.x + 50 &&
+          ivorySquarePosition.y >= hole.y &&
+          ivorySquarePosition.y <= hole.y + 50
+        ) {
+          onGameOver();
+          return;
+        }
+      }
+    };
+
+    const interval = setInterval(checkGameOver, 100);
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition, holes, onGameOver]);
+
+  useEffect(() => {
+    const checkGameWin = () => {
+      if (ivorySquarePosition.y <= 0) {
+        onGameWin();
+      }
+    };
+
+    const interval = setInterval(checkGameWin, 100);
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition, onGameWin]);
+
+  useEffect(() => {
+    const handleGameReset = () => {
+      const currentTime = Date.now();
+      if (currentTime - lastResetTime < 60000) {
+        onGameOver();
+      } else {
+        setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        setLastResetTime(currentTime);
+      }
+    };
+
+    const interval = setInterval(() => {
+      for (let hole of holes) {
+        if (
+          ivorySquarePosition.x >= hole.x &&
+          ivorySquarePosition.x <= hole.x + 50 &&
+          ivorySquarePosition.y >= hole.y &&
+          ivorySquarePosition.y <= hole.y + 50
+        ) {
+          handleGameReset();
+          return;
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [ivorySquarePosition, holes, lastResetTime, onGameOver]);
+
+  useEffect(() => {
+    const handleGameStart = () => {
+      setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      setLastResetTime(Date.now());
+    };
+
+    handleGameStart();
+  }, []);
 
   return (
     <div className={styles.desertBackground}>
