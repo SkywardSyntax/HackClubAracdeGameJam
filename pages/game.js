@@ -8,6 +8,7 @@ function Game() {
   const [gameWon, setGameWon] = useState(false);
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
   const lastResetTimeRef = useRef(Date.now());
+  const [keysPressed, setKeysPressed] = useState({});
 
   const startGame = () => {
     setGameStarted(true);
@@ -29,21 +30,36 @@ function Game() {
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
-      setIvorySquarePosition((prevPosition) => {
-        let newPosition = { ...prevPosition };
-        if (key === 'ArrowUp') newPosition.y -= 10;
-        if (key === 'ArrowDown') newPosition.y += 10;
-        if (key === 'ArrowLeft') newPosition.x -= 10;
-        if (key === 'ArrowRight') newPosition.x += 10;
-        return newPosition;
-      });
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: true }));
     };
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
+    const handleKeyUp = (event) => {
+      const { key } = event;
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: false }));
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIvorySquarePosition((prevPosition) => {
+        let newPosition = { ...prevPosition };
+        if (keysPressed['ArrowUp']) newPosition.y -= 5;
+        if (keysPressed['ArrowDown']) newPosition.y += 5;
+        if (keysPressed['ArrowLeft']) newPosition.x -= 5;
+        if (keysPressed['ArrowRight']) newPosition.x += 5;
+        return newPosition;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [keysPressed]);
 
   useEffect(() => {
     const handleResize = () => {

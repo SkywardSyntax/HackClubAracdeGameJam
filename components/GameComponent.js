@@ -9,36 +9,48 @@ function GameComponent({ onGameOver, onGameWin }) {
   const lastResetTimeRef = useRef(Date.now());
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
+  const [keysPressed, setKeysPressed] = useState({});
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
-      setVelocity((prevVelocity) => {
-        let newVelocity = { ...prevVelocity };
-        if (key === 'ArrowUp') newVelocity.y -= 1;
-        if (key === 'ArrowDown') newVelocity.y += 1;
-        if (key === 'ArrowLeft') newVelocity.x -= 1;
-        if (key === 'ArrowRight') newVelocity.x += 1;
-        return newVelocity;
-      });
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: true }));
+    };
+
+    const handleKeyUp = (event) => {
+      const { key } = event;
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: false }));
     };
 
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('keyup', handleKeyUp);
+      };
     }
   }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      setVelocity((prevVelocity) => {
+        let newVelocity = { x: 0, y: 0 };
+        if (keysPressed['ArrowUp']) newVelocity.y -= 0.5;
+        if (keysPressed['ArrowDown']) newVelocity.y += 0.5;
+        if (keysPressed['ArrowLeft']) newVelocity.x -= 0.5;
+        if (keysPressed['ArrowRight']) newVelocity.x += 0.5;
+        return newVelocity;
+      });
+
       setIvorySquarePosition((prevPosition) => ({
         x: prevPosition.x + velocity.x,
         y: prevPosition.y + velocity.y,
       }));
-    }, 100);
+    }, 50);
 
     return () => clearInterval(interval);
-  }, [velocity]);
+  }, [keysPressed, velocity]);
 
   useEffect(() => {
     const handleResize = () => {

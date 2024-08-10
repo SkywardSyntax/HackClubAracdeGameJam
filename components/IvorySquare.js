@@ -1,24 +1,49 @@
 import { useEffect, useState } from 'react';
+import { mat4 } from 'gl-matrix';
 
 function IvorySquare() {
   const [position, setPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const [keysPressed, setKeysPressed] = useState({});
+  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
-      setPosition((prevPosition) => {
-        let newPosition = { ...prevPosition };
-        if (key === 'ArrowUp') newPosition.y -= 10;
-        if (key === 'ArrowDown') newPosition.y += 10;
-        if (key === 'ArrowLeft') newPosition.x -= 10;
-        if (key === 'ArrowRight') newPosition.x += 10;
-        return newPosition;
-      });
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: true }));
+    };
+
+    const handleKeyUp = (event) => {
+      const { key } = event;
+      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: false }));
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVelocity((prevVelocity) => {
+        let newVelocity = { x: 0, y: 0 };
+        if (keysPressed['ArrowUp']) newVelocity.y -= 5;
+        if (keysPressed['ArrowDown']) newVelocity.y += 5;
+        if (keysPressed['ArrowLeft']) newVelocity.x -= 5;
+        if (keysPressed['ArrowRight']) newVelocity.x += 5;
+        return newVelocity;
+      });
+
+      setPosition((prevPosition) => ({
+        x: prevPosition.x + velocity.x,
+        y: prevPosition.y + velocity.y,
+      }));
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [keysPressed, velocity]);
 
   return (
     <div
