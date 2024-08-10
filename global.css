@@ -11,12 +11,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   hyphens: auto;
-  background-color: #d3d3d3;
+  background-color: #EDC9AF;
 }
 
 canvas {
   display: block;
-  background-color: #d3d3d3;
+  background-color: #EDC9AF;
   z-index: 1;
 }
 

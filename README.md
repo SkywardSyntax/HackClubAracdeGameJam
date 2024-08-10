@@ -1,30 +1,26 @@
-# Black Hole Animation
+# Desert Adventure Game
 
-Welcome to the Black Hole Animation! This is an exciting and visually stunning animation of a black hole with realistic lighting on a black background.
+Welcome to the Desert Adventure Game! This is an exciting and challenging game where you must navigate an ivory colored square across a desert background to reach civilization.
 
-## Running the Animation
+## Running the Game
 
-To run the animation, ensure you are in a browser environment. The animation relies on the `window` object, which is only available in browsers.
+To run the game, ensure you are in a browser environment. The game relies on the `window` object, which is only available in browsers.
 
-Note: The animation must be run in a browser environment to function correctly.
+Note: The game must be run in a browser environment to function correctly.
 
-## Animation Description
+## Game Description
 
-In this animation, a black hole with advanced and sophisticated lighting techniques, including ray tracing and complex light interactions, is rendered on a black background. The animation showcases the mesmerizing and captivating nature of a black hole. The light bending effect around the black hole is implemented using WebGL shaders.
+In this game, you control an ivory colored square that spawns in a desert background. The objective is to cross the desert to reach civilization, which is some distance in the upward direction relative to the Birds Eye view of the screen. However, there are many black circles that represent holes, and if you fall down one of them, you get taken backward 1 minute of your adventure and get placed there. If a point comes where you fall into a hole within 1 minute of your last reset, or your first "unreset" run, then you lose the game.
 
 ## Controls
 
-- There are no controls for this animation. Just sit back and enjoy the visual experience.
+- Use the arrow keys to move the ivory colored square in the desired direction.
 
 ## Objective
 
-- The objective is to provide a visually stunning and realistic animation of a black hole with advanced lighting techniques on a black background.
+- The objective is to cross the desert to reach civilization, avoiding black circles that represent holes, which cause a reset if fallen into.
 
 ## Additional Information
 
-- The animation uses WebGL for rendering the black hole and its lighting effects.
-- The animation now includes a realistic twisting of light around the black hole's borders.
-- The black hole is now visible.
-- The black hole now has a border.
-- The black hole now has a glowing effect around its edges.
-- The WebGL shaders include advanced techniques like gravitational lensing and relativistic effects.
+- The game uses basic HTML, CSS, and JavaScript for rendering the player character, desert background, and holes.
+- The game includes mechanics for crossing the desert, avoiding holes, and resetting the player's position upon falling into a hole.
