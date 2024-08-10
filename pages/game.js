@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from '../components/Game.module.css';
 import GameComponent from '../components/GameComponent';
 
@@ -6,13 +6,14 @@ function Game() {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+  const lastResetTimeRef = useRef(Date.now());
 
   const startGame = () => {
     setGameStarted(true);
     setGameOver(false);
     setGameWon(false);
-    setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
   };
 
   const handleGameOver = () => {
@@ -38,17 +39,21 @@ function Game() {
       });
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
   }, []);
 
   useEffect(() => {
     const handleResize = () => {
-      setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   useEffect(() => {
@@ -87,11 +92,11 @@ function Game() {
   useEffect(() => {
     const handleGameReset = () => {
       const currentTime = Date.now();
-      if (currentTime - lastResetTime < 60000) {
+      if (currentTime - lastResetTimeRef.current < 60000) {
         handleGameOver();
       } else {
-        setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-        setLastResetTime(currentTime);
+        setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+        lastResetTimeRef.current = currentTime;
       }
     };
 
@@ -119,7 +124,7 @@ function Game() {
     if (typeof window !== 'undefined') {
       const handleGameStart = () => {
         setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-        setLastResetTime(Date.now());
+        lastResetTimeRef.current = Date.now();
       };
 
       handleGameStart();
