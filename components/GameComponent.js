@@ -6,7 +6,8 @@ class GameComponent extends React.Component {
     super(props);
     this.myRef = React.createRef();
     this.state = {
-      timer: 60 // Pc09e
+      timer: 60,
+      gameStarted: false
     };
   }
 
@@ -36,30 +37,32 @@ class GameComponent extends React.Component {
       if (gameOver) return;
 
       p.background('#EDC9AF');
-      p.fill('#F5F5DC');
-      p.noStroke();
-      p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
+      if (this.state.gameStarted) {
+        p.fill('#F5F5DC');
+        p.noStroke();
+        p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
 
-      if (keysPressed['ArrowUp']) velocity.y -= 0.5;
-      if (keysPressed['ArrowDown']) velocity.y += 0.5;
-      if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
-      if (keysPressed['ArrowRight']) velocity.x += 0.5;
+        if (keysPressed['ArrowUp']) velocity.y -= 0.5;
+        if (keysPressed['ArrowDown']) velocity.y += 0.5;
+        if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
+        if (keysPressed['ArrowRight']) velocity.x += 0.5;
 
-      ivorySquare.x += velocity.x;
-      ivorySquare.y += velocity.y;
+        ivorySquare.x += velocity.x;
+        ivorySquare.y += velocity.y;
 
-      velocity.x *= 0.9;
-      velocity.y *= 0.9;
+        velocity.x *= 0.9;
+        velocity.y *= 0.9;
 
-      p.fill(0);
-      circles.forEach((circle) => {
-        p.ellipse(circle.x, circle.y, 50, 50);
-      });
+        p.fill(0);
+        circles.forEach((circle) => {
+          p.ellipse(circle.x, circle.y, 50, 50);
+        });
 
-      p.checkGameOver();
-      p.checkGameWin();
+        p.checkGameOver();
+        p.checkGameWin();
+      }
 
-      // Display the timer (P4d28)
+      // Display the timer
       p.fill(255);
       p.textSize(32);
       p.text(`Time: ${this.state.timer}`, p.width - 150, 50);
@@ -86,7 +89,7 @@ class GameComponent extends React.Component {
           ivorySquare.y >= circle.y - 25 &&
           ivorySquare.y <= circle.y + 25
         ) {
-          this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds (P7350)
+          this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds
           if (this.state.timer <= 0) {
             gameOver = true;
             this.props.onGameOver();
@@ -116,7 +119,7 @@ class GameComponent extends React.Component {
       }
     }, 100);
 
-    // Decrement the timer every second (P7350)
+    // Decrement the timer every second
     setInterval(() => {
       this.setState((prevState) => ({ timer: prevState.timer - 1 }));
       if (this.state.timer <= 0) {
@@ -128,13 +131,18 @@ class GameComponent extends React.Component {
 
   componentDidMount() {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
+    this.startGame();
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.gameStarted && !prevProps.gameStarted) {
-      this.setState({ timer: 60 }); // Reset the timer when the game is restarted (P7d27)
+      this.setState({ timer: 60 }); // Reset the timer when the game is restarted
     }
   }
+
+  startGame = () => {
+    this.setState({ gameStarted: true });
+  };
 
   render() {
     return <div ref={this.myRef}></div>;

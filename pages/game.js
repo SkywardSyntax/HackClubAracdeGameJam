@@ -2,11 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import p5 from 'p5';
 import styles from '../components/Game.module.css';
-
-const GameComponent = dynamic(() => import('../components/GameComponent'), { ssr: false });
+import GameComponent from '../components/GameComponent'; // P2618
 
 function Game() {
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false); // P57da
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
@@ -15,7 +14,7 @@ function Game() {
   const [timer, setTimer] = useState(60); // 60 seconds
 
   const startGame = () => {
-    setGameStarted(true);
+    setGameStarted(true); // P3c40
     setGameOver(false);
     setGameWon(false);
     setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
@@ -179,7 +178,7 @@ function Game() {
           Start Game
         </button>
       )}
-      {gameStarted && <div id="p5-canvas"></div>}
+      {gameStarted && <GameComponent gameStarted={gameStarted} onGameOver={handleGameOver} onGameWin={handleGameWin} />} {/* Pd0d0 */}
       {gameOver && (
         <div className={styles.gameOverMessage}>
           Game Over
