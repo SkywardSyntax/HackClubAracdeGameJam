@@ -2,10 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import p5 from 'p5';
 import styles from '../components/Game.module.css';
-import GameComponent from '../components/GameComponent'; // P2618
+import GameComponent from '../components/GameComponent';
 
 function Game() {
-  const [gameStarted, setGameStarted] = useState(false); // P57da
+  const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
@@ -14,11 +14,25 @@ function Game() {
   const [timer, setTimer] = useState(60); // 60 seconds
 
   const startGame = () => {
-    setGameStarted(true); // P3c40
-    setGameOver(false);
-    setGameWon(false);
-    setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-    setTimer(60); // Reset timer to 60 seconds
+    if (!gameStarted) {
+      setGameStarted(true);
+      setGameOver(false);
+      setGameWon(false);
+      setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+      setTimer(60); // Reset timer to 60 seconds
+      const timerInterval = setInterval(() => {
+        if (gameStarted) {
+          setTimer((prevTimer) => {
+            if (prevTimer <= 1) {
+              handleGameOver();
+              clearInterval(timerInterval);
+              return 0;
+            }
+            return prevTimer - 1;
+          });
+        }
+      }, 1000);
+    }
   };
 
   const handleGameOver = () => {
@@ -155,22 +169,6 @@ function Game() {
     }
   }, []);
 
-  useEffect(() => {
-    if (gameStarted) {
-      const interval = setInterval(() => {
-        setTimer((prevTimer) => {
-          if (prevTimer <= 1) {
-            handleGameOver();
-            return 0;
-          }
-          return prevTimer - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [gameStarted]);
-
   return (
     <div className={styles.desertBackground}>
       {!gameStarted && !gameOver && !gameWon && (
@@ -178,7 +176,7 @@ function Game() {
           Start Game
         </button>
       )}
-      {gameStarted && <GameComponent gameStarted={gameStarted} onGameOver={handleGameOver} onGameWin={handleGameWin} />} {/* Pd0d0 */}
+      {gameStarted && <GameComponent gameStarted={gameStarted} onGameOver={handleGameOver} onGameWin={handleGameWin} />}
       {gameOver && (
         <div className={styles.gameOverMessage}>
           Game Over
@@ -187,11 +185,6 @@ function Game() {
       {gameWon && (
         <div className={styles.winMessage}>
           You Win!
-        </div>
-      )}
-      {gameStarted && (
-        <div className={styles.timer}>
-          Time: {timer}
         </div>
       )}
     </div>
