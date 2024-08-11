@@ -1,154 +1,125 @@
-import { useEffect, useState, useRef } from 'react';
-import styles from './Game.module.css';
-import IvorySquare from './IvorySquare';
-import BlackCircles from './BlackCircle';
+import React from 'react';
+import p5 from 'p5';
 
-function GameComponent({ onGameOver, onGameWin }) {
-  const [playerPosition, setPlayerPosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-  const lastResetTimeRef = useRef(Date.now());
-  const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
-  const [keysPressed, setKeysPressed] = useState({});
-  const [timer, setTimer] = useState(60000); // 60 seconds
+class GameComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      const { key } = event;
-      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: true }));
+  Sketch = (p) => {
+    let ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+    let velocity = { x: 0, y: 0 };
+    let keysPressed = {};
+    let circles = [];
+    let timer = 60000; // 60 seconds
+    let lastResetTime = Date.now();
+
+    p.setup = () => {
+      p.createCanvas(p.windowWidth, p.windowHeight);
+      p.rectMode(p.CENTER);
+      for (let i = 0; i < 10; i++) {
+        circles.push({
+          x: p.random(p.width),
+          y: p.random(p.height),
+        });
+      }
     };
 
-    const handleKeyUp = (event) => {
-      const { key } = event;
-      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: false }));
-    };
+    p.draw = () => {
+      p.background('#EDC9AF');
+      p.fill('#F5F5DC');
+      p.noStroke();
+      p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', handleKeyDown);
-      window.addEventListener('keyup', handleKeyUp);
-      return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-        window.removeEventListener('keyup', handleKeyUp);
-      };
-    }
-  }, []);
+      if (keysPressed['ArrowUp']) velocity.y -= 0.5;
+      if (keysPressed['ArrowDown']) velocity.y += 0.5;
+      if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
+      if (keysPressed['ArrowRight']) velocity.x += 0.5;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVelocity((prevVelocity) => {
-        let newVelocity = { x: 0, y: 0 };
-        if (keysPressed['ArrowUp']) newVelocity.y -= 0.5;
-        if (keysPressed['ArrowDown']) newVelocity.y += 0.5;
-        if (keysPressed['ArrowLeft']) newVelocity.x -= 0.5;
-        if (keysPressed['ArrowRight']) newVelocity.x += 0.5;
-        return newVelocity;
+      ivorySquare.x += velocity.x;
+      ivorySquare.y += velocity.y;
+
+      velocity.x *= 0.9;
+      velocity.y *= 0.9;
+
+      p.fill(0);
+      circles.forEach((circle) => {
+        p.ellipse(circle.x, circle.y, 50, 50);
       });
 
-      setIvorySquarePosition((prevPosition) => ({
-        x: prevPosition.x + velocity.x,
-        y: prevPosition.y + velocity.y,
-      }));
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [keysPressed, velocity]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setPlayerPosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-      setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+      p.checkGameOver();
+      p.checkGameWin();
     };
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
+    p.keyPressed = () => {
+      keysPressed[p.key] = true;
+    };
 
-  useEffect(() => {
-    const checkGameOver = () => {
-      const holes = document.querySelectorAll(`.${styles.blackHole}`);
-      for (let hole of holes) {
-        const holeRect = hole.getBoundingClientRect();
+    p.keyReleased = () => {
+      keysPressed[p.key] = false;
+    };
+
+    p.windowResized = () => {
+      p.resizeCanvas(p.windowWidth, p.windowHeight);
+      ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+    };
+
+    p.updateCircles = () => {
+      circles = [];
+      for (let i = 0; i < 10; i++) {
+        circles.push({
+          x: p.random(p.width),
+          y: p.random(p.height),
+        });
+      }
+    };
+
+    p.checkGameOver = () => {
+      circles.forEach((circle) => {
         if (
-          ivorySquarePosition.x >= holeRect.left &&
-          ivorySquarePosition.x <= holeRect.right &&
-          ivorySquarePosition.y >= holeRect.top &&
-          ivorySquarePosition.y <= holeRect.bottom
+          ivorySquare.x >= circle.x - 25 &&
+          ivorySquare.x <= circle.x + 25 &&
+          ivorySquare.y >= circle.y - 25 &&
+          ivorySquare.y <= circle.y + 25
         ) {
-          setTimer((prevTimer) => prevTimer - 30000); // Decrement timer by 30 seconds
+          timer -= 30000; // Decrement timer by 30 seconds
           if (timer <= 0) {
-            onGameOver();
+            this.props.onGameOver();
           } else {
-            setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-            lastResetTimeRef.current = Date.now();
+            ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+            lastResetTime = Date.now();
           }
-          return;
         }
+      });
+    };
+
+    p.checkGameWin = () => {
+      if (ivorySquare.y <= 0) {
+        this.props.onGameWin();
       }
     };
 
-    const interval = setInterval(checkGameOver, 100);
-    return () => clearInterval(interval);
-  }, [ivorySquarePosition, onGameOver, timer]);
+    setInterval(p.updateCircles, 1000);
 
-  useEffect(() => {
-    const checkGameWin = () => {
-      if (ivorySquarePosition.y <= 0) {
-        onGameWin();
-      }
-    };
-
-    const interval = setInterval(checkGameWin, 100);
-    return () => clearInterval(interval);
-  }, [ivorySquarePosition, onGameWin]);
-
-  useEffect(() => {
-    const handleGameReset = () => {
+    setInterval(() => {
       const currentTime = Date.now();
-      if (currentTime - lastResetTimeRef.current < 30000) { // 30 seconds
-        onGameOver();
+      if (currentTime - lastResetTime < 30000) { // 30 seconds
+        this.props.onGameOver();
       } else {
-        setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-        lastResetTimeRef.current = currentTime;
-      }
-    };
-
-    const interval = setInterval(() => {
-      const holes = document.querySelectorAll(`.${styles.blackHole}`);
-      for (let hole of holes) {
-        const holeRect = hole.getBoundingClientRect();
-        if (
-          ivorySquarePosition.x >= holeRect.left &&
-          ivorySquarePosition.x <= holeRect.right &&
-          ivorySquarePosition.y >= holeRect.top &&
-          ivorySquarePosition.y <= holeRect.bottom
-        ) {
-          handleGameReset();
-          return;
-        }
+        ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+        lastResetTime = currentTime;
       }
     }, 100);
+  };
 
-    return () => clearInterval(interval);
-  }, [ivorySquarePosition, lastResetTimeRef, onGameOver]);
+  componentDidMount() {
+    this.myP5 = new p5(this.Sketch, this.myRef.current);
+  }
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const handleGameStart = () => {
-        setIvorySquarePosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-        lastResetTimeRef.current = Date.now();
-      };
-
-      handleGameStart();
-    }
-  }, []);
-
-  return (
-    <div className={styles.desertBackground}>
-      <IvorySquare />
-      <BlackCircles />
-    </div>
-  );
+  render() {
+    return <div ref={this.myRef}></div>;
+  }
 }
 
 export default GameComponent;

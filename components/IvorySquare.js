@@ -1,56 +1,61 @@
-import { useEffect, useState } from 'react';
-import { mat4 } from 'gl-matrix';
+import React from 'react';
+import p5 from 'p5';
 
-function IvorySquare() {
-  const [position, setPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  const [keysPressed, setKeysPressed] = useState({});
-  const [velocity, setVelocity] = useState({ x: 0, y: 0 });
+class IvorySquare extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      const { key } = event;
-      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: true }));
+  Sketch = (p) => {
+    let position = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+    let velocity = { x: 0, y: 0 };
+    let keysPressed = {};
+
+    p.setup = () => {
+      p.createCanvas(p.windowWidth, p.windowHeight);
+      p.rectMode(p.CENTER);
     };
 
-    const handleKeyUp = (event) => {
-      const { key } = event;
-      setKeysPressed((prevKeys) => ({ ...prevKeys, [key]: false }));
+    p.draw = () => {
+      p.background('#EDC9AF');
+      p.fill('#F5F5DC');
+      p.noStroke();
+      p.rect(position.x, position.y, 50, 50);
+
+      if (keysPressed['ArrowUp']) velocity.y -= 0.5;
+      if (keysPressed['ArrowDown']) velocity.y += 0.5;
+      if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
+      if (keysPressed['ArrowRight']) velocity.x += 0.5;
+
+      position.x += velocity.x;
+      position.y += velocity.y;
+
+      velocity.x *= 0.9;
+      velocity.y *= 0.9;
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+    p.keyPressed = () => {
+      keysPressed[p.key] = true;
     };
-  }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVelocity((prevVelocity) => {
-        let newVelocity = { x: 0, y: 0 };
-        if (keysPressed['ArrowUp']) newVelocity.y -= 5;
-        if (keysPressed['ArrowDown']) newVelocity.y += 5;
-        if (keysPressed['ArrowLeft']) newVelocity.x -= 5;
-        if (keysPressed['ArrowRight']) newVelocity.x += 5;
-        return newVelocity;
-      });
+    p.keyReleased = () => {
+      keysPressed[p.key] = false;
+    };
 
-      setPosition((prevPosition) => ({
-        x: prevPosition.x + velocity.x,
-        y: prevPosition.y + velocity.y,
-      }));
-    }, 50);
+    p.windowResized = () => {
+      p.resizeCanvas(p.windowWidth, p.windowHeight);
+      position = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+    };
+  };
 
-    return () => clearInterval(interval);
-  }, [keysPressed, velocity]);
+  componentDidMount() {
+    this.myP5 = new p5(this.Sketch, this.myRef.current);
+  }
 
-  return (
-    <div
-      className="ivory-square"
-      style={{ left: position.x, top: position.y }}
-    ></div>
-  );
+  render() {
+    return <div ref={this.myRef}></div>;
+  }
 }
 
 export default IvorySquare;

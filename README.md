@@ -22,5 +22,22 @@ In this game, you control an ivory colored square that spawns in a desert backgr
 
 ## Additional Information
 
-- The game uses basic HTML, CSS, and JavaScript for rendering the player character, desert background, and holes.
+- The game uses `p5.js` for rendering the player character, desert background, and holes.
 - The game includes mechanics for crossing the desert, avoiding holes, and resetting the player's position upon falling into a hole.
+
+## Installation and Usage
+
+To install and use `p5.js` and `three.js` in your project, follow these steps:
+
+1. Install the libraries using npm:
+   ```bash
+   npm install p5 three
+   ```
+
+2. Import the libraries in your JavaScript files:
+   ```javascript
+   import p5 from 'p5';
+   import * as THREE from 'three';
+   ```
+
+3. Use the libraries to create your sketches and 3D scenes as needed.

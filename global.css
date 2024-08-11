@@ -20,18 +20,10 @@ canvas {
   z-index: 1;
 }
 
-.black-hole {
-  z-index: 2;
-}
-
-.ivory-square {
-  background-color: ivory;
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.p5-canvas {
+  display: block;
+  background-color: #EDC9AF;
+  z-index: 1;
 }
 
 .desert-background {

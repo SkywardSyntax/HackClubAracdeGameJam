@@ -1,39 +1,58 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
+import p5 from 'p5';
 
-function BlackCircle({ position }) {
-  return (
-    <div
-      className="black-hole"
-      style={{ left: position.x, top: position.y }}
-    ></div>
-  );
-}
+class BlackCircles extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
 
-function generateRandomPosition() {
-  return {
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
+  Sketch = (p) => {
+    let circles = [];
+
+    p.setup = () => {
+      p.createCanvas(p.windowWidth, p.windowHeight);
+      for (let i = 0; i < 10; i++) {
+        circles.push({
+          x: p.random(p.width),
+          y: p.random(p.height),
+        });
+      }
+    };
+
+    p.draw = () => {
+      p.background('#EDC9AF');
+      p.fill(0);
+      p.noStroke();
+      circles.forEach((circle) => {
+        p.ellipse(circle.x, circle.y, 50, 50);
+      });
+    };
+
+    p.windowResized = () => {
+      p.resizeCanvas(p.windowWidth, p.windowHeight);
+    };
+
+    p.updateCircles = () => {
+      circles = [];
+      for (let i = 0; i < 10; i++) {
+        circles.push({
+          x: p.random(p.width),
+          y: p.random(p.height),
+        });
+      }
+    };
+
+    setInterval(p.updateCircles, 1000);
   };
-}
 
-function BlackCircles() {
-  const [holes, setHoles] = useState(Array.from({ length: 10 }, generateRandomPosition));
+  componentDidMount() {
+    this.myP5 = new p5(this.Sketch, this.myRef.current);
+  }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHoles(Array.from({ length: 10 }, generateRandomPosition));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <>
-      {holes.map((position, index) => (
-        <BlackCircle key={index} position={position} />
-      ))}
-    </>
-  );
+  render() {
+    return <div ref={this.myRef}></div>;
+  }
 }
 
 export default BlackCircles;
