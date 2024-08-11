@@ -32,18 +32,6 @@ class BlackCircles extends React.Component {
     p.windowResized = () => {
       p.resizeCanvas(p.windowWidth, p.windowHeight);
     };
-
-    p.updateCircles = () => {
-      circles = [];
-      for (let i = 0; i < 10; i++) {
-        circles.push({
-          x: p.random(p.width),
-          y: p.random(p.height),
-        });
-      }
-    };
-
-    setInterval(p.updateCircles, 1000);
   };
 
   componentDidMount() {

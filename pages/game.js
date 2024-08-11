@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import p5 from 'p5';
 import styles from '../components/Game.module.css';
+
+const GameComponent = dynamic(() => import('../components/GameComponent'), { ssr: false });
 
 function Game() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -87,7 +90,6 @@ function Game() {
 
   useEffect(() => {
     const checkGameOver = () => {
-      // Assuming holes are available in the GameComponent
       const holes = document.querySelectorAll(`.${styles.blackHole}`);
       for (let hole of holes) {
         const holeRect = hole.getBoundingClientRect();
@@ -125,7 +127,6 @@ function Game() {
     };
 
     const interval = setInterval(() => {
-      // Assuming holes are available in the GameComponent
       const holes = document.querySelectorAll(`.${styles.blackHole}`);
       for (let hole of holes) {
         const holeRect = hole.getBoundingClientRect();
@@ -162,19 +163,25 @@ function Game() {
     let circles = [];
     let timer = 60000; // 60 seconds
     let lastResetTime = Date.now();
+    let gameOver = false;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
       p.rectMode(p.CENTER);
+      const spawnRadius = 100; // Radius around the ivory square where no black holes can spawn
       for (let i = 0; i < 10; i++) {
-        circles.push({
-          x: p.random(p.width),
-          y: p.random(p.height),
-        });
+        let x, y;
+        do {
+          x = p.random(p.width);
+          y = p.random(p.height);
+        } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+        circles.push({ x, y });
       }
     };
 
     p.draw = () => {
+      if (gameOver) return;
+
       p.background('#EDC9AF');
       p.fill('#F5F5DC');
       p.noStroke();
@@ -213,16 +220,6 @@ function Game() {
       ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
     };
 
-    p.updateCircles = () => {
-      circles = [];
-      for (let i = 0; i < 10; i++) {
-        circles.push({
-          x: p.random(p.width),
-          y: p.random(p.height),
-        });
-      }
-    };
-
     p.checkGameOver = () => {
       circles.forEach((circle) => {
         if (
@@ -233,6 +230,7 @@ function Game() {
         ) {
           timer -= 30000; // Decrement timer by 30 seconds
           if (timer <= 0) {
+            gameOver = true;
             handleGameOver();
           } else {
             ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
@@ -244,15 +242,15 @@ function Game() {
 
     p.checkGameWin = () => {
       if (ivorySquare.y <= 0) {
+        gameOver = true;
         handleGameWin();
       }
     };
 
-    setInterval(p.updateCircles, 1000);
-
     setInterval(() => {
       const currentTime = Date.now();
-      if (currentTime - lastResetTime < 30000) { // 30 seconds
+      if (currentTime - lastResetTime < 0) { // 30 seconds
+        gameOver = true;
         handleGameOver();
       } else {
         ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };

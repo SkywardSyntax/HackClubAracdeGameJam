@@ -14,19 +14,25 @@ class GameComponent extends React.Component {
     let circles = [];
     let timer = 60000; // 60 seconds
     let lastResetTime = Date.now();
+    let gameOver = false;
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
       p.rectMode(p.CENTER);
+      const spawnRadius = 100; // Radius around the ivory square where no black holes can spawn
       for (let i = 0; i < 10; i++) {
-        circles.push({
-          x: p.random(p.width),
-          y: p.random(p.height),
-        });
+        let x, y;
+        do {
+          x = p.random(p.width);
+          y = p.random(p.height);
+        } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+        circles.push({ x, y });
       }
     };
 
     p.draw = () => {
+      if (gameOver) return;
+
       p.background('#EDC9AF');
       p.fill('#F5F5DC');
       p.noStroke();
@@ -65,16 +71,6 @@ class GameComponent extends React.Component {
       ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
     };
 
-    p.updateCircles = () => {
-      circles = [];
-      for (let i = 0; i < 10; i++) {
-        circles.push({
-          x: p.random(p.width),
-          y: p.random(p.height),
-        });
-      }
-    };
-
     p.checkGameOver = () => {
       circles.forEach((circle) => {
         if (
@@ -85,6 +81,7 @@ class GameComponent extends React.Component {
         ) {
           timer -= 30000; // Decrement timer by 30 seconds
           if (timer <= 0) {
+            gameOver = true;
             this.props.onGameOver();
           } else {
             ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
@@ -96,15 +93,15 @@ class GameComponent extends React.Component {
 
     p.checkGameWin = () => {
       if (ivorySquare.y <= 0) {
+        gameOver = true;
         this.props.onGameWin();
       }
     };
 
-    setInterval(p.updateCircles, 1000);
-
     setInterval(() => {
       const currentTime = Date.now();
       if (currentTime - lastResetTime < 30000) { // 30 seconds
+        gameOver = true;
         this.props.onGameOver();
       } else {
         ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
