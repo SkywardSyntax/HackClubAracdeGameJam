@@ -5,13 +5,14 @@ class IvorySquare extends React.Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
+    this.state = {
+      position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      velocity: { x: 0, y: 0 },
+      keysPressed: {}
+    };
   }
 
   Sketch = (p) => {
-    let position = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
-    let velocity = { x: 0, y: 0 };
-    let keysPressed = {};
-
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
       p.rectMode(p.CENTER);
@@ -21,31 +22,42 @@ class IvorySquare extends React.Component {
       p.background('#EDC9AF');
       p.fill('#F5F5DC');
       p.noStroke();
-      p.rect(position.x, position.y, 50, 50);
+      p.rect(this.state.position.x, this.state.position.y, 50, 50);
 
-      if (keysPressed['ArrowUp']) velocity.y -= 0.5;
-      if (keysPressed['ArrowDown']) velocity.y += 0.5;
-      if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
-      if (keysPressed['ArrowRight']) velocity.x += 0.5;
+      if (this.state.keysPressed['ArrowUp']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y - 0.5 } }));
+      if (this.state.keysPressed['ArrowDown']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y + 0.5 } }));
+      if (this.state.keysPressed['ArrowLeft']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x - 0.5 } }));
+      if (this.state.keysPressed['ArrowRight']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x + 0.5 } }));
 
-      position.x += velocity.x;
-      position.y += velocity.y;
-
-      velocity.x *= 0.9;
-      velocity.y *= 0.9;
+      this.setState((prevState) => ({
+        position: {
+          x: prevState.position.x + prevState.velocity.x,
+          y: prevState.position.y + prevState.velocity.y
+        },
+        velocity: {
+          x: prevState.velocity.x * 0.9,
+          y: prevState.velocity.y * 0.9
+        }
+      }));
     };
 
     p.keyPressed = () => {
-      keysPressed[p.key] = true;
+      this.setState((prevState) => ({
+        keysPressed: { ...prevState.keysPressed, [p.key]: true }
+      }));
     };
 
     p.keyReleased = () => {
-      keysPressed[p.key] = false;
+      this.setState((prevState) => ({
+        keysPressed: { ...prevState.keysPressed, [p.key]: false }
+      }));
     };
 
     p.windowResized = () => {
       p.resizeCanvas(p.windowWidth, p.windowHeight);
-      position = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+      this.setState({
+        position: { x: p.windowWidth / 2, y: p.windowHeight / 2 }
+      });
     };
   };
 
