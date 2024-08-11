@@ -5,6 +5,9 @@ class GameComponent extends React.Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
+    this.state = {
+      timer: 60 // Pc09e
+    };
   }
 
   Sketch = (p) => {
@@ -12,7 +15,6 @@ class GameComponent extends React.Component {
     let velocity = { x: 0, y: 0 };
     let keysPressed = {};
     let circles = [];
-    let timer = 60000; // 60 seconds
     let lastResetTime = Date.now();
     let gameOver = false;
 
@@ -56,6 +58,11 @@ class GameComponent extends React.Component {
 
       p.checkGameOver();
       p.checkGameWin();
+
+      // Display the timer (P4d28)
+      p.fill(255);
+      p.textSize(32);
+      p.text(`Time: ${this.state.timer}`, p.width - 150, 50);
     };
 
     p.keyPressed = () => {
@@ -79,8 +86,8 @@ class GameComponent extends React.Component {
           ivorySquare.y >= circle.y - 25 &&
           ivorySquare.y <= circle.y + 25
         ) {
-          timer -= 30000; // Decrement timer by 30 seconds
-          if (timer <= 0) {
+          this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds (P7350)
+          if (this.state.timer <= 0) {
             gameOver = true;
             this.props.onGameOver();
           } else {
@@ -108,10 +115,25 @@ class GameComponent extends React.Component {
         lastResetTime = currentTime;
       }
     }, 100);
+
+    // Decrement the timer every second (P7350)
+    setInterval(() => {
+      this.setState((prevState) => ({ timer: prevState.timer - 1 }));
+      if (this.state.timer <= 0) {
+        gameOver = true;
+        this.props.onGameOver();
+      }
+    }, 1000);
   };
 
   componentDidMount() {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.gameStarted && !prevProps.gameStarted) {
+      this.setState({ timer: 60 }); // Reset the timer when the game is restarted (P7d27)
+    }
   }
 
   render() {
