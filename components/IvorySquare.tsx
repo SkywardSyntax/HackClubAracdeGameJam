@@ -1,8 +1,27 @@
 import React from 'react';
 import p5 from 'p5';
 
-class IvorySquare extends React.Component {
-  constructor(props) {
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface Velocity {
+  x: number;
+  y: number;
+}
+
+interface State {
+  position: Position;
+  velocity: Velocity;
+  keysPressed: { [key: string]: boolean };
+}
+
+class IvorySquare extends React.Component<{}, State> {
+  private myRef: React.RefObject<HTMLDivElement>;
+  private myP5: p5 | undefined;
+
+  constructor(props: {}) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
@@ -12,7 +31,7 @@ class IvorySquare extends React.Component {
     };
   }
 
-  Sketch = (p) => {
+  Sketch = (p: p5) => {
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
       p.rectMode(p.CENTER);

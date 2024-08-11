@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { FC } from 'react';
 
-function Home() {
+const Home: FC = () => {
   return (
     <main>
       <Link href="/game" legacyBehavior>

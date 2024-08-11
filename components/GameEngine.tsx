@@ -1,8 +1,22 @@
 import React from 'react';
 import p5 from 'p5';
 
-class GameEngine extends React.Component {
-  constructor(props) {
+interface GameEngineProps {
+  gameStarted: boolean;
+  onGameOver: () => void;
+  onGameWin: () => void;
+}
+
+interface GameEngineState {
+  timer: number;
+  gameStarted: boolean;
+}
+
+class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
+  private myRef: React.RefObject<HTMLDivElement>;
+  private timerInterval: NodeJS.Timeout | null;
+
+  constructor(props: GameEngineProps) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
@@ -12,11 +26,11 @@ class GameEngine extends React.Component {
     this.timerInterval = null;
   }
 
-  Sketch = (p) => {
+  Sketch = (p: p5) => {
     let ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
     let velocity = { x: 0, y: 0 };
-    let keysPressed = {};
-    let circles = [];
+    let keysPressed: { [key: string]: boolean } = {};
+    let circles: { x: number, y: number }[] = [];
     let lastResetTime = Date.now();
     let gameOver = false;
 
@@ -109,14 +123,16 @@ class GameEngine extends React.Component {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: GameEngineProps) {
     if (this.props.gameStarted && !prevProps.gameStarted) {
       this.setState({ timer: 60 }); // Reset the timer when the game is restarted
     }
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerInterval);
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 
   startGame = () => {

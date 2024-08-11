@@ -2,7 +2,9 @@ import { useState } from 'react';
 import styles from '../components/Game.module.css';
 import GameEngine from '../components/GameEngine';
 
-function Game() {
+interface GameProps {}
+
+const Game: React.FC<GameProps> = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);

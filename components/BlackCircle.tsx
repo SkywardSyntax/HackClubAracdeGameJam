@@ -1,8 +1,21 @@
 import React from 'react';
 import p5 from 'p5';
 
-class BlackCircles extends React.Component {
-  constructor(props) {
+interface Circle {
+  x: number;
+  y: number;
+}
+
+interface BlackCirclesState {
+  circles: Circle[];
+  keysPressed: { [key: string]: boolean };
+}
+
+class BlackCircles extends React.Component<{}, BlackCirclesState> {
+  private myRef: React.RefObject<HTMLDivElement>;
+  private myP5: p5 | undefined;
+
+  constructor(props: {}) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
@@ -11,7 +24,7 @@ class BlackCircles extends React.Component {
     };
   }
 
-  Sketch = (p) => {
+  Sketch = (p: p5) => {
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
       this.setState({

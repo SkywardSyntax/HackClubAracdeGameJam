@@ -3,14 +3,23 @@
   "scripts": {
     "dev": "next",
     "start": "next start",
-    "postinstall": "next build"
+    "postinstall": "next build",
+    "build:ts": "tsc -p .",
+    "dev:ts": "tsc -p . --watch"
   },
   "dependencies": {
+    "@types/react-dom": "^17.0.10",
     "gl-matrix": "^3.4.3",
     "next": "^14.1.1",
+    "p5": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.133.1",
-    "p5": "^1.4.0"
+    "three": "^0.133.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.2.0",
+    "@types/p5": "^1.7.6",
+    "@types/react": "18.3.3",
+    "typescript": "5.5.4"
   }
 }
