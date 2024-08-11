@@ -1,15 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from './Game.module.css';
 import IvorySquare from './IvorySquare';
-import BlackCircle from './BlackCircle';
+import BlackCircles from './BlackCircle';
 
 function GameComponent({ onGameOver, onGameWin }) {
   const [playerPosition, setPlayerPosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
-  const [holes, setHoles] = useState(generateHoles());
   const lastResetTimeRef = useRef(Date.now());
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
   const [keysPressed, setKeysPressed] = useState({});
+  const [timer, setTimer] = useState(60000); // 60 seconds
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -66,14 +66,22 @@ function GameComponent({ onGameOver, onGameWin }) {
 
   useEffect(() => {
     const checkGameOver = () => {
+      const holes = document.querySelectorAll(`.${styles.blackHole}`);
       for (let hole of holes) {
+        const holeRect = hole.getBoundingClientRect();
         if (
-          ivorySquarePosition.x >= hole.x &&
-          ivorySquarePosition.x <= hole.x + 50 &&
-          ivorySquarePosition.y >= hole.y &&
-          ivorySquarePosition.y <= hole.y + 50
+          ivorySquarePosition.x >= holeRect.left &&
+          ivorySquarePosition.x <= holeRect.right &&
+          ivorySquarePosition.y >= holeRect.top &&
+          ivorySquarePosition.y <= holeRect.bottom
         ) {
-          onGameOver();
+          setTimer((prevTimer) => prevTimer - 30000); // Decrement timer by 30 seconds
+          if (timer <= 0) {
+            onGameOver();
+          } else {
+            setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+            lastResetTimeRef.current = Date.now();
+          }
           return;
         }
       }
@@ -81,7 +89,7 @@ function GameComponent({ onGameOver, onGameWin }) {
 
     const interval = setInterval(checkGameOver, 100);
     return () => clearInterval(interval);
-  }, [ivorySquarePosition, holes, onGameOver]);
+  }, [ivorySquarePosition, onGameOver, timer]);
 
   useEffect(() => {
     const checkGameWin = () => {
@@ -97,7 +105,7 @@ function GameComponent({ onGameOver, onGameWin }) {
   useEffect(() => {
     const handleGameReset = () => {
       const currentTime = Date.now();
-      if (currentTime - lastResetTimeRef.current < 60000) {
+      if (currentTime - lastResetTimeRef.current < 30000) { // 30 seconds
         onGameOver();
       } else {
         setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
@@ -106,12 +114,14 @@ function GameComponent({ onGameOver, onGameWin }) {
     };
 
     const interval = setInterval(() => {
+      const holes = document.querySelectorAll(`.${styles.blackHole}`);
       for (let hole of holes) {
+        const holeRect = hole.getBoundingClientRect();
         if (
-          ivorySquarePosition.x >= hole.x &&
-          ivorySquarePosition.x <= hole.x + 50 &&
-          ivorySquarePosition.y >= hole.y &&
-          ivorySquarePosition.y <= hole.y + 50
+          ivorySquarePosition.x >= holeRect.left &&
+          ivorySquarePosition.x <= holeRect.right &&
+          ivorySquarePosition.y >= holeRect.top &&
+          ivorySquarePosition.y <= holeRect.bottom
         ) {
           handleGameReset();
           return;
@@ -120,7 +130,7 @@ function GameComponent({ onGameOver, onGameWin }) {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [ivorySquarePosition, holes, lastResetTimeRef, onGameOver]);
+  }, [ivorySquarePosition, lastResetTimeRef, onGameOver]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -136,29 +146,9 @@ function GameComponent({ onGameOver, onGameWin }) {
   return (
     <div className={styles.desertBackground}>
       <IvorySquare />
-      <BlackCircle />
-      {holes.map((hole, index) => (
-        <div
-          key={index}
-          className={styles.blackHole}
-          style={{ left: hole.x, top: hole.y }}
-        ></div>
-      ))}
+      <BlackCircles />
     </div>
   );
-}
-
-function generateHoles() {
-  const holes = [];
-  if (typeof window !== 'undefined') {
-    for (let i = 0; i < 10; i++) {
-      holes.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-      });
-    }
-  }
-  return holes;
 }
 
 export default GameComponent;

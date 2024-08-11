@@ -9,12 +9,14 @@ function Game() {
   const [ivorySquarePosition, setIvorySquarePosition] = useState({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
   const lastResetTimeRef = useRef(Date.now());
   const [keysPressed, setKeysPressed] = useState({});
+  const [timer, setTimer] = useState(60000); // 60 seconds
 
   const startGame = () => {
     setGameStarted(true);
     setGameOver(false);
     setGameWon(false);
     setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+    setTimer(60000); // Reset timer to 60 seconds
   };
 
   const handleGameOver = () => {
@@ -95,7 +97,13 @@ function Game() {
           ivorySquarePosition.y >= holeRect.top &&
           ivorySquarePosition.y <= holeRect.bottom
         ) {
-          handleGameOver();
+          setTimer((prevTimer) => prevTimer - 30000); // Decrement timer by 30 seconds
+          if (timer <= 0) {
+            handleGameOver();
+          } else {
+            setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });
+            lastResetTimeRef.current = Date.now();
+          }
           return;
         }
       }
@@ -103,12 +111,12 @@ function Game() {
 
     const interval = setInterval(checkGameOver, 100);
     return () => clearInterval(interval);
-  }, [ivorySquarePosition]);
+  }, [ivorySquarePosition, timer]);
 
   useEffect(() => {
     const handleGameReset = () => {
       const currentTime = Date.now();
-      if (currentTime - lastResetTimeRef.current < 60000) {
+      if (currentTime - lastResetTimeRef.current < 30000) { // 30 seconds
         handleGameOver();
       } else {
         setIvorySquarePosition({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 });

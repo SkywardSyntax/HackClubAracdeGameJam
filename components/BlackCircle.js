@@ -1,25 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function BlackCircle() {
-  const [position, setPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      const { key } = event;
-      setPosition((prevPosition) => {
-        let newPosition = { ...prevPosition };
-        if (key === 'ArrowUp') newPosition.y -= 10;
-        if (key === 'ArrowDown') newPosition.y += 10;
-        if (key === 'ArrowLeft') newPosition.x -= 10;
-        if (key === 'ArrowRight') newPosition.x += 10;
-        return newPosition;
-      });
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
+function BlackCircle({ position }) {
   return (
     <div
       className="black-hole"
@@ -28,4 +9,31 @@ function BlackCircle() {
   );
 }
 
-export default BlackCircle;
+function generateRandomPosition() {
+  return {
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+  };
+}
+
+function BlackCircles() {
+  const [holes, setHoles] = useState(Array.from({ length: 10 }, generateRandomPosition));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHoles(Array.from({ length: 10 }, generateRandomPosition));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {holes.map((position, index) => (
+        <BlackCircle key={index} position={position} />
+      ))}
+    </>
+  );
+}
+
+export default BlackCircles;
