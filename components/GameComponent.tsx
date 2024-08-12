@@ -30,7 +30,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
     let ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
     let velocity = { x: 0, y: 0 };
     let keysPressed: { [key: string]: boolean } = {};
-    let circles: { x: number, y: number }[] = [];
+    let circles: { x: number, y: number, opacity: number }[] = [];
     let lastResetTime = Date.now();
     let gameOver = false;
     let cameraOffset = { x: 0, y: 0 };
@@ -45,7 +45,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
           x = p.random(p.width);
           y = p.random(p.height);
         } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
-        circles.push({ x, y });
+        circles.push({ x, y, opacity: 255 });
       }
     };
 
@@ -74,6 +74,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
 
         p.fill(0);
         circles.forEach((circle) => {
+          p.fill(0, 0, 0, circle.opacity);
           p.ellipse(circle.x, circle.y, 50, 50);
         });
 
@@ -85,6 +86,9 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         cameraOffset.y = ivorySquare.y - p.height / 2;
 
         p.pop();
+
+        // Check and add black circles
+        this.checkAndAddBlackCircles(p);
       }
     };
 
@@ -126,6 +130,63 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         gameOver = true;
         this.props.onGameWin();
       }
+    };
+
+    this.checkAndAddBlackCircles = (p: p5) => {
+      const visibleCircles = circles.filter(circle => {
+        return (
+          circle.x >= cameraOffset.x &&
+          circle.x <= cameraOffset.x + p.width &&
+          circle.y >= cameraOffset.y &&
+          circle.y <= cameraOffset.y + p.height
+        );
+      });
+
+      const offScreenCircles = circles.filter(circle => {
+        return (
+          circle.x < cameraOffset.x ||
+          circle.x > cameraOffset.x + p.width ||
+          circle.y < cameraOffset.y ||
+          circle.y > cameraOffset.y + p.height
+        );
+      });
+
+      offScreenCircles.forEach(circle => {
+        this.fadeOutCircle(circle);
+      });
+
+      if (visibleCircles.length < 10) {
+        const spawnRadius = 100;
+        for (let i = visibleCircles.length; i < 10; i++) {
+          let x, y;
+          do {
+            x = p.random(p.width);
+            y = p.random(p.height);
+          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+          circles.push({ x, y, opacity: 255 });
+        }
+      }
+    };
+
+    this.fadeOutCircle = (circle: { x: number, y: number, opacity: number }) => {
+      const interval = setInterval(() => {
+        this.setState((prevState) => {
+          const updatedCircles = prevState.circles.map(c => {
+            if (c === circle) {
+              return { ...c, opacity: c.opacity - 5 };
+            }
+            return c;
+          });
+          return { circles: updatedCircles };
+        });
+
+        if (circle.opacity <= 0) {
+          clearInterval(interval);
+          this.setState((prevState) => ({
+            circles: prevState.circles.filter(c => c !== circle)
+          }));
+        }
+      }, 50);
     };
   };
 

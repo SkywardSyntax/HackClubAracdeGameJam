@@ -131,7 +131,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     };
 
     this.checkAndAddBlackCircles = (p: p5) => {
-      const visibleCircles = circles.filter(circle => {
+      const visibleCircles = circles?.filter(circle => {
         return (
           circle.x >= cameraOffset.x &&
           circle.x <= cameraOffset.x + p.width &&
@@ -140,7 +140,20 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         );
       });
 
-      if (visibleCircles.length < 10) {
+      const offScreenCircles = circles?.filter(circle => {
+        return (
+          circle.x < cameraOffset.x ||
+          circle.x > cameraOffset.x + p.width ||
+          circle.y < cameraOffset.y ||
+          circle.y > cameraOffset.y + p.height
+        );
+      });
+
+      offScreenCircles?.forEach(circle => {
+        this.fadeOutCircle(circle);
+      });
+
+      if (visibleCircles?.length < 10) {
         const spawnRadius = 100;
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
@@ -151,6 +164,27 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
           circles.push({ x, y });
         }
       }
+    };
+
+    this.fadeOutCircle = (circle: { x: number, y: number }) => {
+      const interval = setInterval(() => {
+        this.setState((prevState) => {
+          const updatedCircles = prevState.circles?.map(c => {
+            if (c === circle) {
+              return { ...c, opacity: c.opacity - 5 };
+            }
+            return c;
+          });
+          return { circles: updatedCircles };
+        });
+
+        if (circle.opacity <= 0) {
+          clearInterval(interval);
+          this.setState((prevState) => ({
+            circles: prevState.circles?.filter(c => c !== circle)
+          }));
+        }
+      }, 50);
     };
   };
 
