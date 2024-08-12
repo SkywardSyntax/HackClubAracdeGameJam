@@ -70,12 +70,19 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
         }
       });
 
-      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, this.removeCircleFromArray);
+      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray);
 
       // Remove circles that are out of view
       this.setState((prevState) => ({
         circles: prevState.circles.filter(circle => circle.x >= 0 && circle.x <= p.width && circle.y >= 0 && circle.y <= p.height)
       }));
+
+      // Limit the number of black circles to 10
+      if (this.state.circles.length > 10) {
+        this.setState((prevState) => ({
+          circles: prevState.circles.slice(0, 10)
+        }));
+      }
 
       if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
         const currentTime = p.millis();
@@ -104,6 +111,18 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
           dashCooldown: prevState.dashCooldown - 1
         }));
       }
+
+      // Update player position based on velocity
+      this.setState((prevState) => ({
+        playerPosition: {
+          x: prevState.playerPosition.x + prevState.playerVelocity.x,
+          y: prevState.playerPosition.y + prevState.playerVelocity.y
+        },
+        playerVelocity: {
+          x: prevState.playerVelocity.x * 0.9,
+          y: prevState.playerVelocity.y * 0.9
+        }
+      }));
     };
 
     p.windowResized = () => {
@@ -119,26 +138,6 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     p.keyReleased = () => {
       this.setState((prevState) => ({
         keysPressed: { ...prevState.keysPressed, [p.key]: false }
-      }));
-    };
-
-    this.removeCircleFromArray = (circle: Circle) => {
-      this.setState((prevState) => ({
-        circles: prevState.circles?.filter(c => c !== circle)
-      }));
-      this.createParticles(circle);
-    };
-
-    this.createParticles = (circle: Circle) => {
-      const particles = Array.from({ length: 20 }, () => ({
-        x: circle.x,
-        y: circle.y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        opacity: 255
-      }));
-      this.setState((prevState) => ({
-        particles: [...prevState.particles, ...particles]
       }));
     };
   };

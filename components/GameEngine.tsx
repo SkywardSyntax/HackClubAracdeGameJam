@@ -104,7 +104,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         p.pop();
 
         // Check and add black circles
-        checkAndAddBlackCircles(p, circles, ivorySquare, velocity, cameraOffset, this.removeCircleFromArray);
+        checkAndAddBlackCircles(p, circles, ivorySquare, velocity, this.removeCircleFromArray);
 
         // Store the current position of the ivory square
         this.previousPositions.push({ x: ivorySquare.x, y: ivorySquare.y });
