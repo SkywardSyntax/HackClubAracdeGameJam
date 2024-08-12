@@ -10,6 +10,7 @@ interface Circle {
 interface BlackCirclesState {
   circles: Circle[];
   keysPressed: { [key: string]: boolean };
+  playerPosition: { x: number, y: number };
 }
 
 class BlackCircles extends React.Component<{}, BlackCirclesState> {
@@ -21,7 +22,8 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     this.myRef = React.createRef();
     this.state = {
       circles: [],
-      keysPressed: {}
+      keysPressed: {},
+      playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     };
   }
 
@@ -85,40 +87,28 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       });
 
       offScreenCircles?.forEach(circle => {
-        this.fadeOutCircle(circle);
+        this.removeCircle(circle);
       });
 
       if (visibleCircles?.length < 10) {
-        const newCircles = Array.from({ length: 10 - visibleCircles.length }, () => ({
-          x: p.random(p.width),
-          y: p.random(p.height),
-          opacity: 255
-        }));
-        this.setState((prevState) => ({
-          circles: [...prevState.circles, ...newCircles]
-        }));
+        const spawnRadius = 100;
+        for (let i = visibleCircles.length; i < 10; i++) {
+          let x, y;
+          do {
+            x = p.random(this.state.playerPosition.x - spawnRadius, this.state.playerPosition.x + spawnRadius);
+            y = p.random(this.state.playerPosition.y - spawnRadius, this.state.playerPosition.y + spawnRadius);
+          } while (p.dist(x, y, this.state.playerPosition.x, this.state.playerPosition.y) < spawnRadius);
+          this.setState((prevState) => ({
+            circles: [...prevState.circles, { x, y, opacity: 255 }]
+          }));
+        }
       }
     };
 
-    this.fadeOutCircle = (circle: Circle) => {
-      const interval = setInterval(() => {
-        this.setState((prevState) => {
-          const updatedCircles = prevState.circles?.map(c => {
-            if (c === circle) {
-              return { ...c, opacity: c.opacity - 5 };
-            }
-            return c;
-          });
-          return { circles: updatedCircles };
-        });
-
-        if (circle.opacity <= 0) {
-          clearInterval(interval);
-          this.setState((prevState) => ({
-            circles: prevState.circles?.filter(c => c !== circle)
-          }));
-        }
-      }, 50);
+    this.removeCircle = (circle: Circle) => {
+      this.setState((prevState) => ({
+        circles: prevState.circles?.filter(c => c !== circle)
+      }));
     };
   };
 

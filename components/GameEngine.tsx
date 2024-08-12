@@ -29,7 +29,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     let ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
     let velocity = { x: 0, y: 0 };
     let keysPressed: { [key: string]: boolean } = {};
-    let circles: { x: number, y: number }[] = [];
+    let circles: { x: number, y: number, opacity: number }[] = [];
     let lastResetTime = Date.now();
     let gameOver = false;
     let cameraOffset = { x: 0, y: 0 };
@@ -44,7 +44,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
           x = p.random(p.width);
           y = p.random(p.height);
         } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
-        circles.push({ x, y });
+        circles.push({ x, y, opacity: 255 });
       }
     };
 
@@ -60,10 +60,10 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         p.noStroke();
         p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
 
-        if (keysPressed['ArrowUp']) velocity.y -= 0.5;
-        if (keysPressed['ArrowDown']) velocity.y += 0.5;
-        if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
-        if (keysPressed['ArrowRight']) velocity.x += 0.5;
+        if (keysPressed['ArrowUp']) velocity.y -= 1.0;
+        if (keysPressed['ArrowDown']) velocity.y += 1.0;
+        if (keysPressed['ArrowLeft']) velocity.x -= 1.0;
+        if (keysPressed['ArrowRight']) velocity.x += 1.0;
 
         ivorySquare.x += velocity.x;
         ivorySquare.y += velocity.y;
@@ -73,6 +73,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
         p.fill(0);
         circles.forEach((circle) => {
+          p.fill(0, 0, 0, circle.opacity);
           p.ellipse(circle.x, circle.y, 50, 50);
         });
 
@@ -150,7 +151,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
       });
 
       offScreenCircles?.forEach(circle => {
-        this.fadeOutCircle(circle);
+        this.removeCircle(circle);
       });
 
       if (visibleCircles?.length < 10) {
@@ -158,33 +159,18 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
           do {
-            x = p.random(p.width);
-            y = p.random(p.height);
+            x = p.random(ivorySquare.x - spawnRadius, ivorySquare.x + spawnRadius);
+            y = p.random(ivorySquare.y - spawnRadius, ivorySquare.y + spawnRadius);
           } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
-          circles.push({ x, y });
+          circles.push({ x, y, opacity: 255 });
         }
       }
     };
 
-    this.fadeOutCircle = (circle: { x: number, y: number }) => {
-      const interval = setInterval(() => {
-        this.setState((prevState) => {
-          const updatedCircles = prevState.circles?.map(c => {
-            if (c === circle) {
-              return { ...c, opacity: c.opacity - 5 };
-            }
-            return c;
-          });
-          return { circles: updatedCircles };
-        });
-
-        if (circle.opacity <= 0) {
-          clearInterval(interval);
-          this.setState((prevState) => ({
-            circles: prevState.circles?.filter(c => c !== circle)
-          }));
-        }
-      }, 50);
+    this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
+      this.setState((prevState) => ({
+        circles: prevState.circles?.filter(c => c !== circle)
+      }));
     };
   };
 

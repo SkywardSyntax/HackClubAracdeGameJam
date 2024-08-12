@@ -61,10 +61,10 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         p.noStroke();
         p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
 
-        if (keysPressed['ArrowUp']) velocity.y -= 0.5;
-        if (keysPressed['ArrowDown']) velocity.y += 0.5;
-        if (keysPressed['ArrowLeft']) velocity.x -= 0.5;
-        if (keysPressed['ArrowRight']) velocity.x += 0.5;
+        if (keysPressed['ArrowUp']) velocity.y -= 1.0; // P867c
+        if (keysPressed['ArrowDown']) velocity.y += 1.0; // P867c
+        if (keysPressed['ArrowLeft']) velocity.x -= 1.0; // P867c
+        if (keysPressed['ArrowRight']) velocity.x += 1.0; // P867c
 
         ivorySquare.x += velocity.x;
         ivorySquare.y += velocity.y;
@@ -152,7 +152,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
       });
 
       offScreenCircles.forEach(circle => {
-        this.fadeOutCircle(circle);
+        this.removeCircle(circle);
       });
 
       if (visibleCircles.length < 10) {
@@ -160,33 +160,18 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
           do {
-            x = p.random(p.width);
-            y = p.random(p.height);
-          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+            x = p.random(ivorySquare.x - spawnRadius, ivorySquare.x + spawnRadius); // Pb49b
+            y = p.random(ivorySquare.y - spawnRadius, ivorySquare.y + spawnRadius); // Pb49b
+          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius); // Pb49b
           circles.push({ x, y, opacity: 255 });
         }
       }
     };
 
-    this.fadeOutCircle = (circle: { x: number, y: number, opacity: number }) => {
-      const interval = setInterval(() => {
-        this.setState((prevState) => {
-          const updatedCircles = prevState.circles.map(c => {
-            if (c === circle) {
-              return { ...c, opacity: c.opacity - 5 };
-            }
-            return c;
-          });
-          return { circles: updatedCircles };
-        });
-
-        if (circle.opacity <= 0) {
-          clearInterval(interval);
-          this.setState((prevState) => ({
-            circles: prevState.circles.filter(c => c !== circle)
-          }));
-        }
-      }, 50);
+    this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
+      this.setState((prevState) => ({
+        circles: prevState.circles.filter(c => c !== circle)
+      }));
     };
   };
 
