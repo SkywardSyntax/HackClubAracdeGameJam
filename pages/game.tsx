@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from '../components/Game.module.css';
-import GameEngine from '../components/GameEngine';
+import GameComponent from '../components/GameEngine';
 
 interface GameProps {}
 
@@ -34,7 +34,7 @@ const Game: React.FC<GameProps> = () => {
           Start Game
         </button>
       )}
-      {gameStarted && <GameEngine gameStarted={gameStarted} onGameOver={handleGameOver} onGameWin={handleGameWin} />}
+      {gameStarted && <GameComponent gameStarted={gameStarted} onGameOver={handleGameOver} onGameWin={handleGameWin} />}
       {gameOver && (
         <div className={styles.gameOverMessage}>
           Game Over

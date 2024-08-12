@@ -9,19 +9,18 @@ interface GameEngineProps {
 
 interface GameEngineState {
   timer: number;
-  gameStarted: boolean;
 }
 
 class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
+  private myP5: p5 | undefined;
 
   constructor(props: GameEngineProps) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
-      timer: 60,
-      gameStarted: false
+      timer: 60
     };
     this.timerInterval = null;
   }
@@ -33,6 +32,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     let circles: { x: number, y: number }[] = [];
     let lastResetTime = Date.now();
     let gameOver = false;
+    let cameraOffset = { x: 0, y: 0 };
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
@@ -52,7 +52,10 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
       if (gameOver) return;
 
       p.background('#EDC9AF');
-      if (this.state.gameStarted) {
+      if (this.props.gameStarted) {
+        p.push();
+        p.translate(-cameraOffset.x, -cameraOffset.y);
+
         p.fill('#F5F5DC');
         p.noStroke();
         p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
@@ -75,6 +78,12 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
         p.checkGameOver();
         p.checkGameWin();
+
+        // Adjust camera position
+        cameraOffset.x = ivorySquare.x - p.width / 2;
+        cameraOffset.y = ivorySquare.y - p.height / 2;
+
+        p.pop();
       }
     };
 
@@ -122,32 +131,6 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   componentDidMount() {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
   }
-
-  componentDidUpdate(prevProps: GameEngineProps) {
-    if (this.props.gameStarted && !prevProps.gameStarted) {
-      this.setState({ timer: 60 }); // Reset the timer when the game is restarted
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
-  }
-
-  startGame = () => {
-    if (!this.state.gameStarted) {
-      this.setState({ gameStarted: true, timer: 60 });
-      this.timerInterval = setInterval(() => {
-        if (this.state.gameStarted) {
-          this.setState((prevState) => ({ timer: prevState.timer - 1 }));
-          if (this.state.timer <= 0) {
-            this.props.onGameOver();
-          }
-        }
-      }, 1000);
-    }
-  };
 
   render() {
     return <div ref={this.myRef}></div>;

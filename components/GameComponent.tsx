@@ -33,6 +33,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
     let circles: { x: number, y: number }[] = [];
     let lastResetTime = Date.now();
     let gameOver = false;
+    let cameraOffset = { x: 0, y: 0 };
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight);
@@ -53,6 +54,9 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
 
       p.background('#EDC9AF');
       if (this.state.gameStarted) {
+        p.push();
+        p.translate(-cameraOffset.x, -cameraOffset.y);
+
         p.fill('#F5F5DC');
         p.noStroke();
         p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
@@ -75,6 +79,12 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
 
         p.checkGameOver();
         p.checkGameWin();
+
+        // Adjust camera position
+        cameraOffset.x = ivorySquare.x - p.width / 2;
+        cameraOffset.y = ivorySquare.y - p.height / 2;
+
+        p.pop();
       }
     };
 

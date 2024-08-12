@@ -15,6 +15,7 @@ interface State {
   position: Position;
   velocity: Velocity;
   keysPressed: { [key: string]: boolean };
+  cameraOffset: Position;
 }
 
 class IvorySquare extends React.Component<{}, State> {
@@ -27,7 +28,8 @@ class IvorySquare extends React.Component<{}, State> {
     this.state = {
       position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       velocity: { x: 0, y: 0 },
-      keysPressed: {}
+      keysPressed: {},
+      cameraOffset: { x: 0, y: 0 }
     };
   }
 
@@ -39,6 +41,9 @@ class IvorySquare extends React.Component<{}, State> {
 
     p.draw = () => {
       p.background('#EDC9AF');
+      p.push();
+      p.translate(-this.state.cameraOffset.x, -this.state.cameraOffset.y);
+
       p.fill('#F5F5DC');
       p.noStroke();
       p.rect(this.state.position.x, this.state.position.y, 50, 50);
@@ -58,6 +63,16 @@ class IvorySquare extends React.Component<{}, State> {
           y: prevState.velocity.y * 0.9
         }
       }));
+
+      // Adjust camera position
+      this.setState((prevState) => ({
+        cameraOffset: {
+          x: prevState.position.x - p.width / 2,
+          y: prevState.position.y - p.height / 2
+        }
+      }));
+
+      p.pop();
     };
 
     p.keyPressed = () => {
