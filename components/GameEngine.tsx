@@ -12,11 +12,20 @@ interface GameEngineState {
   timer: number;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  opacity: number;
+}
+
 class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
   private myP5: p5 | undefined;
   private previousPositions: { x: number, y: number }[] = [];
+  private particles: Particle[] = [];
 
   constructor(props: GameEngineProps) {
     super(props);
@@ -77,6 +86,17 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         circles.forEach((circle) => {
           p.fill(0, 0, 0, circle.opacity);
           p.ellipse(circle.x, circle.y, 50, 50);
+        });
+
+        this.particles.forEach((particle, index) => {
+          p.fill(0, 0, 0, particle.opacity);
+          p.ellipse(particle.x, particle.y, 5, 5);
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.opacity -= 5;
+          if (particle.opacity <= 0) {
+            this.particles = this.particles.filter((_, i) => i !== index);
+          }
         });
 
         p.checkGameOver();
@@ -200,6 +220,18 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
     this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
       circles = circles.filter(c => c !== circle);
+      this.createParticles(circle);
+    };
+
+    this.createParticles = (circle: { x: number, y: number, opacity: number }) => {
+      const particles = Array.from({ length: 20 }, () => ({
+        x: circle.x,
+        y: circle.y,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        opacity: 255
+      }));
+      this.particles = [...this.particles, ...particles];
     };
   };
 

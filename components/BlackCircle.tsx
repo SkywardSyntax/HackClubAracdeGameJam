@@ -8,8 +8,17 @@ interface Circle {
   opacity: number;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  opacity: number;
+}
+
 interface BlackCirclesState {
   circles: Circle[];
+  particles: Particle[];
   keysPressed: { [key: string]: boolean };
   playerPosition: { x: number, y: number };
   playerVelocity: { x: number, y: number };
@@ -24,6 +33,7 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     this.myRef = React.createRef();
     this.state = {
       circles: [],
+      particles: [],
       keysPressed: {},
       playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       playerVelocity: { x: 0, y: 0 }
@@ -49,6 +59,19 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       this.state.circles.forEach((circle) => {
         p.fill(0, 0, 0, circle.opacity);
         p.ellipse(circle.x, circle.y, 50, 50);
+      });
+
+      this.state.particles.forEach((particle, index) => {
+        p.fill(0, 0, 0, particle.opacity);
+        p.ellipse(particle.x, particle.y, 5, 5);
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.opacity -= 5;
+        if (particle.opacity <= 0) {
+          this.setState((prevState) => ({
+            particles: prevState.particles.filter((_, i) => i !== index)
+          }));
+        }
       });
 
       this.checkAndAddBlackCircles(p);
@@ -130,6 +153,20 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     this.removeCircle = (circle: Circle) => {
       this.setState((prevState) => ({
         circles: prevState.circles?.filter(c => c !== circle)
+      }));
+      this.createParticles(circle);
+    };
+
+    this.createParticles = (circle: Circle) => {
+      const particles = Array.from({ length: 20 }, () => ({
+        x: circle.x,
+        y: circle.y,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        opacity: 255
+      }));
+      this.setState((prevState) => ({
+        particles: [...prevState.particles, ...particles]
       }));
     };
   };
