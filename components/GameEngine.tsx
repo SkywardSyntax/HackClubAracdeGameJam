@@ -84,6 +84,9 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         cameraOffset.y = ivorySquare.y - p.height / 2;
 
         p.pop();
+
+        // Check and add black circles
+        this.checkAndAddBlackCircles(p);
       }
     };
 
@@ -124,6 +127,29 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
       if (ivorySquare.y <= 0) {
         gameOver = true;
         this.props.onGameWin();
+      }
+    };
+
+    this.checkAndAddBlackCircles = (p: p5) => {
+      const visibleCircles = circles.filter(circle => {
+        return (
+          circle.x >= cameraOffset.x &&
+          circle.x <= cameraOffset.x + p.width &&
+          circle.y >= cameraOffset.y &&
+          circle.y <= cameraOffset.y + p.height
+        );
+      });
+
+      if (visibleCircles.length < 10) {
+        const spawnRadius = 100;
+        for (let i = visibleCircles.length; i < 10; i++) {
+          let x, y;
+          do {
+            x = p.random(p.width);
+            y = p.random(p.height);
+          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+          circles.push({ x, y });
+        }
       }
     };
   };
