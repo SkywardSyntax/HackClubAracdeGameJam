@@ -1,5 +1,6 @@
 import React from 'react';
 import p5 from 'p5';
+import { determineEdge } from './EdgeDetector';
 
 interface Circle {
   x: number;
@@ -11,6 +12,7 @@ interface BlackCirclesState {
   circles: Circle[];
   keysPressed: { [key: string]: boolean };
   playerPosition: { x: number, y: number };
+  playerVelocity: { x: number, y: number };
 }
 
 class BlackCircles extends React.Component<{}, BlackCirclesState> {
@@ -23,7 +25,8 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     this.state = {
       circles: [],
       keysPressed: {},
-      playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      playerVelocity: { x: 0, y: 0 }
     };
   }
 
@@ -94,10 +97,29 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
         const spawnRadius = 100;
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
-          do {
-            x = p.random(this.state.playerPosition.x - spawnRadius, this.state.playerPosition.x + spawnRadius);
-            y = p.random(this.state.playerPosition.y - spawnRadius, this.state.playerPosition.y + spawnRadius);
-          } while (p.dist(x, y, this.state.playerPosition.x, this.state.playerPosition.y) < spawnRadius);
+          const edge = determineEdge(this.state.playerPosition, this.state.playerVelocity);
+          switch (edge) {
+            case 'top':
+              x = p.random(p.width);
+              y = -spawnRadius;
+              break;
+            case 'right':
+              x = p.width + spawnRadius;
+              y = p.random(p.height);
+              break;
+            case 'bottom':
+              x = p.random(p.width);
+              y = p.height + spawnRadius;
+              break;
+            case 'left':
+              x = -spawnRadius;
+              y = p.random(p.height);
+              break;
+            default:
+              x = p.random(p.width);
+              y = p.random(p.height);
+              break;
+          }
           this.setState((prevState) => ({
             circles: [...prevState.circles, { x, y, opacity: 255 }]
           }));

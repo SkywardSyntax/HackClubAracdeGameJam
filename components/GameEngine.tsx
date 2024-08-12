@@ -1,5 +1,6 @@
 import React from 'react';
 import p5 from 'p5';
+import { determineEdge } from './EdgeDetector';
 
 interface GameEngineProps {
   gameStarted: boolean;
@@ -169,10 +170,29 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         const spawnRadius = 100;
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
-          do {
-            x = p.random(ivorySquare.x - spawnRadius, ivorySquare.x + spawnRadius);
-            y = p.random(ivorySquare.y - spawnRadius, ivorySquare.y + spawnRadius);
-          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
+          const edge = determineEdge({ x: ivorySquare.x, y: ivorySquare.y }, velocity);
+          switch (edge) {
+            case 'top':
+              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
+              y = cameraOffset.y - spawnRadius;
+              break;
+            case 'right':
+              x = cameraOffset.x + p.width + spawnRadius;
+              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
+              break;
+            case 'bottom':
+              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
+              y = cameraOffset.y + p.height + spawnRadius;
+              break;
+            case 'left':
+              x = cameraOffset.x - spawnRadius;
+              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
+              break;
+            default:
+              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
+              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
+              break;
+          }
           circles.push({ x, y, opacity: 255 });
         }
       }
