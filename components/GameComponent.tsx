@@ -15,6 +15,7 @@ interface GameComponentState {
 class GameComponent extends React.Component<GameComponentProps, GameComponentState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
+  private previousPositions: { x: number, y: number }[] = [];
 
   constructor(props: GameComponentProps) {
     super(props);
@@ -61,10 +62,10 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         p.noStroke();
         p.rect(ivorySquare.x, ivorySquare.y, 50, 50);
 
-        if (keysPressed['ArrowUp']) velocity.y -= 1.0; // P867c
-        if (keysPressed['ArrowDown']) velocity.y += 1.0; // P867c
-        if (keysPressed['ArrowLeft']) velocity.x -= 1.0; // P867c
-        if (keysPressed['ArrowRight']) velocity.x += 1.0; // P867c
+        if (keysPressed['ArrowUp']) velocity.y -= 1.0;
+        if (keysPressed['ArrowDown']) velocity.y += 1.0;
+        if (keysPressed['ArrowLeft']) velocity.x -= 1.0;
+        if (keysPressed['ArrowRight']) velocity.x += 1.0;
 
         ivorySquare.x += velocity.x;
         ivorySquare.y += velocity.y;
@@ -89,6 +90,12 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
 
         // Check and add black circles
         this.checkAndAddBlackCircles(p);
+
+        // Store the current position of the ivory square
+        this.previousPositions.push({ x: ivorySquare.x, y: ivorySquare.y });
+        if (this.previousPositions.length > 1800) {
+          this.previousPositions.shift(); // Keep only the last 30 seconds of positions (assuming 60 FPS)
+        }
       }
     };
 
@@ -118,8 +125,12 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
             gameOver = true;
             this.props.onGameOver();
           } else {
-            ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+            // Set the ivory square back 30 seconds in space and time
+            const resetPosition = this.previousPositions[0];
+            ivorySquare = { x: resetPosition.x, y: resetPosition.y };
             lastResetTime = Date.now();
+            this.removeCircle(circle); // Remove the black circle upon collision
+            this.previousPositions = []; // Clear the previous positions
           }
         }
       });
@@ -160,18 +171,16 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         for (let i = visibleCircles.length; i < 10; i++) {
           let x, y;
           do {
-            x = p.random(ivorySquare.x - spawnRadius, ivorySquare.x + spawnRadius); // Pb49b
-            y = p.random(ivorySquare.y - spawnRadius, ivorySquare.y + spawnRadius); // Pb49b
-          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius); // Pb49b
+            x = p.random(ivorySquare.x - spawnRadius, ivorySquare.x + spawnRadius);
+            y = p.random(ivorySquare.y - spawnRadius, ivorySquare.y + spawnRadius);
+          } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
           circles.push({ x, y, opacity: 255 });
         }
       }
     };
 
     this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
-      this.setState((prevState) => ({
-        circles: prevState.circles.filter(c => c !== circle)
-      }));
+      circles = circles.filter(c => c !== circle);
     };
   };
 

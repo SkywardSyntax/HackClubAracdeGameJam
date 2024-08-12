@@ -15,6 +15,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
   private myP5: p5 | undefined;
+  private previousPositions: { x: number, y: number }[] = [];
 
   constructor(props: GameEngineProps) {
     super(props);
@@ -88,6 +89,12 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
         // Check and add black circles
         this.checkAndAddBlackCircles(p);
+
+        // Store the current position of the ivory square
+        this.previousPositions.push({ x: ivorySquare.x, y: ivorySquare.y });
+        if (this.previousPositions.length > 1800) {
+          this.previousPositions.shift(); // Keep only the last 30 seconds of positions (assuming 60 FPS)
+        }
       }
     };
 
@@ -117,8 +124,12 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
             gameOver = true;
             this.props.onGameOver();
           } else {
-            ivorySquare = { x: p.windowWidth / 2, y: p.windowHeight / 2 };
+            // Set the ivory square back 30 seconds in space and time
+            const resetPosition = this.previousPositions[0];
+            ivorySquare = { x: resetPosition.x, y: resetPosition.y };
             lastResetTime = Date.now();
+            this.removeCircle(circle); // Remove the black circle upon collision
+            this.previousPositions = []; // Clear the previous positions
           }
         }
       });
@@ -168,9 +179,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     };
 
     this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
-      this.setState((prevState) => ({
-        circles: prevState.circles?.filter(c => c !== circle)
-      }));
+      circles = circles.filter(c => c !== circle);
     };
   };
 
