@@ -60,12 +60,14 @@ class Camera extends React.Component<CameraProps, CameraState> {
   }
 
   updateCameraPosition = () => {
-    this.setState({
-      cameraOffset: {
-        x: this.props.playerPosition.x - window.innerWidth / 2,
-        y: this.props.playerPosition.y - window.innerHeight / 2
-      }
-    });
+    if (typeof window !== 'undefined') {
+      this.setState({
+        cameraOffset: {
+          x: this.props.playerPosition.x - window.innerWidth / 2,
+          y: this.props.playerPosition.y - window.innerHeight / 2
+        }
+      });
+    }
   };
 
   smoothZoom = () => {

@@ -8,6 +8,10 @@ interface State {
   velocity: Velocity;
   keysPressed: { [key: string]: boolean };
   cameraOffset: Position;
+  isDashing: boolean;
+  dashCooldown: number;
+  lastDashTime: number;
+  lastSpacePressTime: number;
 }
 
 class IvorySquare extends React.Component<{}, State> {
@@ -21,7 +25,11 @@ class IvorySquare extends React.Component<{}, State> {
       position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       velocity: { x: 0, y: 0 },
       keysPressed: {},
-      cameraOffset: { x: 0, y: 0 }
+      cameraOffset: { x: 0, y: 0 },
+      isDashing: false,
+      dashCooldown: 0,
+      lastDashTime: 0,
+      lastSpacePressTime: 0
     };
   }
 
@@ -44,6 +52,34 @@ class IvorySquare extends React.Component<{}, State> {
       if (this.state.keysPressed['ArrowDown']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y + 1.5 } }));
       if (this.state.keysPressed['ArrowLeft']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x - 1.5 } }));
       if (this.state.keysPressed['ArrowRight']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x + 1.5 } }));
+
+      if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
+        const currentTime = p.millis();
+        if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+          this.setState((prevState) => ({
+            isDashing: true,
+            dashCooldown: 60, // Cooldown period of 60 frames
+            lastDashTime: currentTime,
+            velocity: {
+              x: prevState.velocity.x * 2,
+              y: prevState.velocity.y * 2
+            }
+          }));
+        }
+        this.setState({ lastSpacePressTime: currentTime });
+      }
+
+      if (this.state.isDashing) {
+        this.setState((prevState) => ({
+          isDashing: false
+        }));
+      }
+
+      if (this.state.dashCooldown > 0) {
+        this.setState((prevState) => ({
+          dashCooldown: prevState.dashCooldown - 1
+        }));
+      }
 
       this.setState((prevState) => ({
         position: {

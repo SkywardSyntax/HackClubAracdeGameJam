@@ -2,7 +2,7 @@ import React from 'react';
 import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
 import { Circle, Particle } from './types';
-import { checkAndAddBlackCircles, removeCircle } from './circleUtils';
+import { checkAndAddBlackCircles, removeCircleFromArray } from './circleUtils';
 
 interface BlackCirclesState {
   circles: Circle[];
@@ -10,6 +10,10 @@ interface BlackCirclesState {
   keysPressed: { [key: string]: boolean };
   playerPosition: { x: number, y: number };
   playerVelocity: { x: number, y: number };
+  isDashing: boolean;
+  dashCooldown: number;
+  lastDashTime: number;
+  lastSpacePressTime: number;
 }
 
 class BlackCircles extends React.Component<{}, BlackCirclesState> {
@@ -23,8 +27,12 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       circles: [],
       particles: [],
       keysPressed: {},
-      playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-      playerVelocity: { x: 0, y: 0 }
+      playerPosition: { x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 },
+      playerVelocity: { x: 0, y: 0 },
+      isDashing: false,
+      dashCooldown: 0,
+      lastDashTime: 0,
+      lastSpacePressTime: 0
     };
   }
 
@@ -62,7 +70,40 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
         }
       });
 
-      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, this.removeCircle);
+      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, this.removeCircleFromArray);
+
+      // Remove circles that are out of view
+      this.setState((prevState) => ({
+        circles: prevState.circles.filter(circle => circle.x >= 0 && circle.x <= p.width && circle.y >= 0 && circle.y <= p.height)
+      }));
+
+      if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
+        const currentTime = p.millis();
+        if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+          this.setState((prevState) => ({
+            isDashing: true,
+            dashCooldown: 60, // Cooldown period of 60 frames
+            lastDashTime: currentTime,
+            playerVelocity: {
+              x: prevState.playerVelocity.x * 2,
+              y: prevState.playerVelocity.y * 2
+            }
+          }));
+        }
+        this.setState({ lastSpacePressTime: currentTime });
+      }
+
+      if (this.state.isDashing) {
+        this.setState((prevState) => ({
+          isDashing: false
+        }));
+      }
+
+      if (this.state.dashCooldown > 0) {
+        this.setState((prevState) => ({
+          dashCooldown: prevState.dashCooldown - 1
+        }));
+      }
     };
 
     p.windowResized = () => {
@@ -81,7 +122,7 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       }));
     };
 
-    this.removeCircle = (circle: Circle) => {
+    this.removeCircleFromArray = (circle: Circle) => {
       this.setState((prevState) => ({
         circles: prevState.circles?.filter(c => c !== circle)
       }));

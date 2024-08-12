@@ -13,6 +13,10 @@ interface GameComponentProps {
 interface GameComponentState {
   timer: number;
   gameStarted: boolean;
+  isDashing: boolean;
+  dashCooldown: number;
+  lastDashTime: number;
+  lastSpacePressTime: number;
 }
 
 class GameComponent extends React.Component<GameComponentProps, GameComponentState> {
@@ -25,7 +29,11 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
     this.myRef = React.createRef();
     this.state = {
       timer: 60,
-      gameStarted: false
+      gameStarted: false,
+      isDashing: false,
+      dashCooldown: 0,
+      lastDashTime: 0,
+      lastSpacePressTime: 0
     };
     this.timerInterval = null;
   }
@@ -69,6 +77,34 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         if (keysPressed['ArrowDown']) velocity.y += 1.0;
         if (keysPressed['ArrowLeft']) velocity.x -= 1.0;
         if (keysPressed['ArrowRight']) velocity.x += 1.0;
+
+        if (keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
+          const currentTime = p.millis();
+          if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+            this.setState((prevState) => ({
+              isDashing: true,
+              dashCooldown: 60, // Cooldown period of 60 frames
+              lastDashTime: currentTime,
+              velocity: {
+                x: prevState.velocity.x * 2,
+                y: prevState.velocity.y * 2
+              }
+            }));
+          }
+          this.setState({ lastSpacePressTime: currentTime });
+        }
+
+        if (this.state.isDashing) {
+          this.setState((prevState) => ({
+            isDashing: false
+          }));
+        }
+
+        if (this.state.dashCooldown > 0) {
+          this.setState((prevState) => ({
+            dashCooldown: prevState.dashCooldown - 1
+          }));
+        }
 
         ivorySquare.x += velocity.x;
         ivorySquare.y += velocity.y;

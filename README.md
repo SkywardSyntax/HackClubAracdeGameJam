@@ -41,3 +41,7 @@ To install and use `p5.js` and `three.js` in your project, follow these steps:
    ```
 
 3. Use the libraries to create your sketches and 3D scenes as needed.
+
+## Browser Environment
+
+To ensure the game runs correctly, make sure you are running it in a browser environment. The game relies on the `window` object, which is only available in browsers. If you encounter a `ReferenceError: window is not defined` error, it means the game is being run in a non-browser environment. Ensure you are running the game in a browser to avoid this issue.

@@ -2,7 +2,7 @@ import React from 'react';
 import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
 import { Particle } from './types';
-import { checkAndAddBlackCircles, removeCircle, createParticles } from './circleUtils';
+import { checkAndAddBlackCircles, removeCircleFromArray, createParticles } from './circleUtils';
 import Camera from './Camera';
 
 interface GameEngineProps {
@@ -104,13 +104,16 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         p.pop();
 
         // Check and add black circles
-        checkAndAddBlackCircles(p, circles, ivorySquare, velocity, cameraOffset, this.removeCircle);
+        checkAndAddBlackCircles(p, circles, ivorySquare, velocity, cameraOffset, this.removeCircleFromArray);
 
         // Store the current position of the ivory square
         this.previousPositions.push({ x: ivorySquare.x, y: ivorySquare.y });
         if (this.previousPositions.length > 1800) {
           this.previousPositions.shift(); // Keep only the last 30 seconds of positions (assuming 60 FPS)
         }
+
+        // Remove circles that are out of view
+        circles = circles.filter(circle => circle.x >= 0 && circle.x <= p.width && circle.y >= 0 && circle.y <= p.height);
       }
     };
 
@@ -144,7 +147,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
             const resetPosition = this.previousPositions[0];
             ivorySquare = { x: resetPosition.x, y: resetPosition.y };
             lastResetTime = Date.now();
-            removeCircle(circles, circle, this.createParticles); // Remove the black circle upon collision
+            removeCircleFromArray(circles, circle, createParticles); // Remove the black circle upon collision
             this.previousPositions = []; // Clear the previous positions
           }
         }

@@ -5,7 +5,7 @@ export function checkAndAddBlackCircles(
   circles: Circle[],
   playerPosition: Position,
   playerVelocity: Velocity,
-  removeCircle: (circle: Circle) => void
+  removeCircleFromArray: (circle: Circle) => void
 ) {
   circles.forEach((circle) => {
     if (
@@ -14,12 +14,12 @@ export function checkAndAddBlackCircles(
       playerPosition.y >= circle.y - 25 &&
       playerPosition.y <= circle.y + 25
     ) {
-      removeCircle(circle);
+      removeCircleFromArray(circle);
     }
   });
 }
 
-export function removeCircle(
+export function removeCircleFromArray(
   circles: Circle[],
   circle: Circle,
   createParticles: (circle: Circle) => void
@@ -39,4 +39,8 @@ export function createParticles(circle: Circle): Particle[] {
     vy: (Math.random() - 0.5) * 2,
     opacity: 255
   }));
+}
+
+export function isCircleOutOfView(circle: Circle, p: p5): boolean {
+  return circle.x < 0 || circle.x > p.width || circle.y < 0 || circle.y > p.height;
 }
