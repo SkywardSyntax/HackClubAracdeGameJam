@@ -1,15 +1,7 @@
 import React from 'react';
 import p5 from 'p5';
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Velocity {
-  x: number;
-  y: number;
-}
+import { Position, Velocity } from './types';
+import Camera from './Camera';
 
 interface State {
   position: Position;
@@ -64,14 +56,6 @@ class IvorySquare extends React.Component<{}, State> {
         }
       }));
 
-      // Adjust camera position
-      this.setState((prevState) => ({
-        cameraOffset: {
-          x: prevState.position.x - p.width / 2,
-          y: prevState.position.y - p.height / 2
-        }
-      }));
-
       p.pop();
     };
 
@@ -100,7 +84,12 @@ class IvorySquare extends React.Component<{}, State> {
   }
 
   render() {
-    return <div ref={this.myRef}></div>;
+    return (
+      <div>
+        <Camera playerPosition={this.state.position} zoomLevel={1} />
+        <div ref={this.myRef}></div>
+      </div>
+    );
   }
 }
 

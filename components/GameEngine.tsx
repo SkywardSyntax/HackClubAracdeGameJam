@@ -1,6 +1,9 @@
 import React from 'react';
 import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
+import { Particle } from './types';
+import { checkAndAddBlackCircles, removeCircle, createParticles } from './circleUtils';
+import Camera from './Camera';
 
 interface GameEngineProps {
   gameStarted: boolean;
@@ -10,14 +13,6 @@ interface GameEngineProps {
 
 interface GameEngineState {
   timer: number;
-}
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  opacity: number;
 }
 
 class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
@@ -109,7 +104,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         p.pop();
 
         // Check and add black circles
-        this.checkAndAddBlackCircles(p);
+        checkAndAddBlackCircles(p, circles, ivorySquare, velocity, cameraOffset, this.removeCircle);
 
         // Store the current position of the ivory square
         this.previousPositions.push({ x: ivorySquare.x, y: ivorySquare.y });
@@ -149,7 +144,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
             const resetPosition = this.previousPositions[0];
             ivorySquare = { x: resetPosition.x, y: resetPosition.y };
             lastResetTime = Date.now();
-            this.removeCircle(circle); // Remove the black circle upon collision
+            removeCircle(circles, circle, this.createParticles); // Remove the black circle upon collision
             this.previousPositions = []; // Clear the previous positions
           }
         }
@@ -161,77 +156,6 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         gameOver = true;
         this.props.onGameWin();
       }
-    };
-
-    this.checkAndAddBlackCircles = (p: p5) => {
-      const visibleCircles = circles?.filter(circle => {
-        return (
-          circle.x >= cameraOffset.x &&
-          circle.x <= cameraOffset.x + p.width &&
-          circle.y >= cameraOffset.y &&
-          circle.y <= cameraOffset.y + p.height
-        );
-      });
-
-      const offScreenCircles = circles?.filter(circle => {
-        return (
-          circle.x < cameraOffset.x ||
-          circle.x > cameraOffset.x + p.width ||
-          circle.y < cameraOffset.y ||
-          circle.y > cameraOffset.y + p.height
-        );
-      });
-
-      offScreenCircles?.forEach(circle => {
-        this.removeCircle(circle);
-      });
-
-      if (visibleCircles?.length < 10) {
-        const spawnRadius = 100;
-        for (let i = visibleCircles.length; i < 10; i++) {
-          let x, y;
-          const edge = determineEdge({ x: ivorySquare.x, y: ivorySquare.y }, velocity);
-          switch (edge) {
-            case 'top':
-              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
-              y = cameraOffset.y - spawnRadius;
-              break;
-            case 'right':
-              x = cameraOffset.x + p.width + spawnRadius;
-              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
-              break;
-            case 'bottom':
-              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
-              y = cameraOffset.y + p.height + spawnRadius;
-              break;
-            case 'left':
-              x = cameraOffset.x - spawnRadius;
-              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
-              break;
-            default:
-              x = p.random(cameraOffset.x, cameraOffset.x + p.width);
-              y = p.random(cameraOffset.y, cameraOffset.y + p.height);
-              break;
-          }
-          circles.push({ x, y, opacity: 255 });
-        }
-      }
-    };
-
-    this.removeCircle = (circle: { x: number, y: number, opacity: number }) => {
-      circles = circles.filter(c => c !== circle);
-      this.createParticles(circle);
-    };
-
-    this.createParticles = (circle: { x: number, y: number, opacity: number }) => {
-      const particles = Array.from({ length: 20 }, () => ({
-        x: circle.x,
-        y: circle.y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        opacity: 255
-      }));
-      this.particles = [...this.particles, ...particles];
     };
   };
 
