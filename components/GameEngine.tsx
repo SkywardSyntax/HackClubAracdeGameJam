@@ -5,6 +5,7 @@ import { Particle } from './types';
 import { checkAndAddBlackCircles, removeCircleFromArray, createParticles, limitBlackCircles } from './circleUtils';
 import Camera from './Camera';
 import IvorySquare from './IvorySquare';
+import Minimap from './Minimap';
 
 interface GameEngineProps {
   gameStarted: boolean;
@@ -171,6 +172,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     return (
       <div>
         <IvorySquare circles={this.state.circles} />
+        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} />
         <div ref={this.myRef}></div>
       </div>
     );

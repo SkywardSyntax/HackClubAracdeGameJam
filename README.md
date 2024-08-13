@@ -25,6 +25,18 @@ In this game, you control an ivory colored square that spawns in a desert backgr
 - The game uses `p5.js` for rendering the player character, desert background, and holes.
 - The game includes mechanics for crossing the desert, avoiding holes, and resetting the player's position upon falling into a hole.
 
+## Minimap
+
+The game now includes a minimap component that renders at the top left corner of the screen. The minimap shows the ivory square in relation to the black circles, providing a quick overview of the player's position and the surrounding obstacles.
+
+### Purpose and Functionality
+
+The minimap helps players navigate the desert by providing a smaller, zoomed-out view of the game area. It displays the player's position as a red square and the black circles as black dots. This allows players to plan their movements and avoid falling into holes.
+
+### How to Use the Minimap
+
+The minimap is automatically displayed at the top left corner of the screen when the game starts. Players can use the minimap to see their position and the locations of the black circles in relation to the game area. The minimap updates in real-time as the player moves and the game progresses.
+
 ## Installation and Usage
 
 To install and use `p5.js` and `three.js` in your project, follow these steps:

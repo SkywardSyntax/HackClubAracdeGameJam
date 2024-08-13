@@ -3,6 +3,7 @@ import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
 import { Position, Velocity } from './types';
 import { checkAndAddBlackCircles, removeCircle } from './circleUtils';
+import Minimap from './Minimap';
 
 interface GameComponentProps {
   gameStarted: boolean;
@@ -225,7 +226,12 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
   };
 
   render() {
-    return <div ref={this.myRef}></div>;
+    return (
+      <div>
+        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} />
+        <div ref={this.myRef}></div>
+      </div>
+    );
   }
 }
 
