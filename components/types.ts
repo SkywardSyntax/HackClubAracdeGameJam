@@ -21,3 +21,5 @@ export interface Velocity {
   x: number;
   y: number;
 }
+
+export type LimitBlackCircles = (circles: Circle[], maxCircles: number) => Circle[];

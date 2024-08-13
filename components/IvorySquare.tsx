@@ -1,6 +1,6 @@
 import React from 'react';
 import p5 from 'p5';
-import { Position, Velocity } from './types';
+import { Position, Velocity, Circle } from './types';
 import Camera from './Camera';
 
 interface State {
@@ -12,13 +12,18 @@ interface State {
   dashCooldown: number;
   lastDashTime: number;
   lastSpacePressTime: number;
+  size: number;
 }
 
-class IvorySquare extends React.Component<{}, State> {
+interface Props {
+  circles: Circle[];
+}
+
+class IvorySquare extends React.Component<Props, State> {
   private myRef: React.RefObject<HTMLDivElement>;
   private myP5: p5 | undefined;
 
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
@@ -29,9 +34,30 @@ class IvorySquare extends React.Component<{}, State> {
       isDashing: false,
       dashCooldown: 0,
       lastDashTime: 0,
-      lastSpacePressTime: 0
+      lastSpacePressTime: 0,
+      size: 50
     };
   }
+
+  pulsateIvorySquare = (p: p5) => {
+    const proximityThreshold = 100;
+    let isCloseToBlackCircle = false;
+
+    this.props.circles.forEach((circle) => {
+      const distance = p.dist(this.state.position.x, this.state.position.y, circle.x, circle.y);
+      if (distance < proximityThreshold) {
+        isCloseToBlackCircle = true;
+      }
+    });
+
+    if (isCloseToBlackCircle) {
+      const time = p.millis() / 1000;
+      const pulsateFactor = 1 + 0.1 * p.sin(time * 2 * p.PI);
+      this.setState({ size: 50 * pulsateFactor });
+    } else {
+      this.setState({ size: 50 });
+    }
+  };
 
   Sketch = (p: p5) => {
     p.setup = () => {
@@ -44,9 +70,11 @@ class IvorySquare extends React.Component<{}, State> {
       p.push();
       p.translate(-this.state.cameraOffset.x, -this.state.cameraOffset.y);
 
+      this.pulsateIvorySquare(p);
+
       p.fill('#F5F5DC');
       p.noStroke();
-      p.rect(this.state.position.x, this.state.position.y, 50, 50);
+      p.rect(this.state.position.x, this.state.position.y, this.state.size, this.state.size);
 
       if (this.state.keysPressed['ArrowUp']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y - 1.5 } }));
       if (this.state.keysPressed['ArrowDown']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y + 1.5 } }));

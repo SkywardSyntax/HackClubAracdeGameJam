@@ -5,7 +5,8 @@ export function checkAndAddBlackCircles(
   circles: Circle[],
   playerPosition: Position,
   playerVelocity: Velocity,
-  removeCircleFromArray: (circle: Circle) => void
+  removeCircleFromArray: (circle: Circle) => void,
+  limitBlackCircles: (circles: Circle[], maxCircles: number) => Circle[]
 ) {
   circles.forEach((circle) => {
     if (
@@ -19,6 +20,7 @@ export function checkAndAddBlackCircles(
   });
 
   spawnBlackCircles(p, circles, playerPosition);
+  circles = limitBlackCircles(circles, 10);
 }
 
 export function createParticles(circle: Circle): Particle[] {
@@ -55,6 +57,8 @@ export function spawnBlackCircles(
 
     circles.push({ x, y, opacity: 255 });
   }
+
+  circles = limitBlackCircles(circles, 10);
 }
 
 export function limitBlackCircles(circles: Circle[], maxCircles: number): Circle[] {
@@ -98,4 +102,6 @@ export function removeCircleFromArray(circles: Circle[], circle: Circle, createP
     // Add particles to the game (assuming there's a global particles array)
     // particlesArray.push(...particles);
   }
+
+  circles = limitBlackCircles(circles, 10);
 }

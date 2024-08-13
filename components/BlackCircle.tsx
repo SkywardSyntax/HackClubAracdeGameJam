@@ -2,7 +2,7 @@ import React from 'react';
 import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
 import { Circle, Particle } from './types';
-import { checkAndAddBlackCircles, removeCircleFromArray } from './circleUtils';
+import { checkAndAddBlackCircles, removeCircleFromArray, limitBlackCircles } from './circleUtils';
 
 interface BlackCirclesState {
   circles: Circle[];
@@ -70,19 +70,7 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
         }
       });
 
-      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray);
-
-      // Remove circles that are out of view
-      this.setState((prevState) => ({
-        circles: prevState.circles.filter(circle => circle.x >= 0 && circle.x <= p.width && circle.y >= 0 && circle.y <= p.height)
-      }));
-
-      // Limit the number of black circles to 10
-      if (this.state.circles.length > 10) {
-        this.setState((prevState) => ({
-          circles: prevState.circles.slice(0, 10)
-        }));
-      }
+      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray, limitBlackCircles);
 
       if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
         const currentTime = p.millis();
@@ -124,28 +112,10 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
         }
       }));
 
-      // Add new black circles just outside the camera view when one exits
-      if (this.state.circles.length < 10) {
-        const edge = determineEdge(this.state.playerPosition, this.state.playerVelocity);
-        let newCircle;
-        switch (edge) {
-          case 'right':
-            newCircle = { x: p.width + 50, y: p.random(p.height), opacity: 255 };
-            break;
-          case 'left':
-            newCircle = { x: -50, y: p.random(p.height), opacity: 255 };
-            break;
-          case 'bottom':
-            newCircle = { x: p.random(p.width), y: p.height + 50, opacity: 255 };
-            break;
-          case 'top':
-            newCircle = { x: p.random(p.width), y: -50, opacity: 255 };
-            break;
-          default:
-            newCircle = { x: p.random(p.width), y: p.random(p.height), opacity: 255 };
-        }
+      // Ensure no more than 10 black circles are on the screen at any time
+      if (this.state.circles.length > 10) {
         this.setState((prevState) => ({
-          circles: [...prevState.circles, newCircle]
+          circles: prevState.circles.slice(0, 10)
         }));
       }
     };
