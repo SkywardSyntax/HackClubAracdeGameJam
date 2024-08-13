@@ -123,6 +123,31 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
           y: prevState.playerVelocity.y * 0.9
         }
       }));
+
+      // Add new black circles just outside the camera view when one exits
+      if (this.state.circles.length < 10) {
+        const edge = determineEdge(this.state.playerPosition, this.state.playerVelocity);
+        let newCircle;
+        switch (edge) {
+          case 'right':
+            newCircle = { x: p.width + 50, y: p.random(p.height), opacity: 255 };
+            break;
+          case 'left':
+            newCircle = { x: -50, y: p.random(p.height), opacity: 255 };
+            break;
+          case 'bottom':
+            newCircle = { x: p.random(p.width), y: p.height + 50, opacity: 255 };
+            break;
+          case 'top':
+            newCircle = { x: p.random(p.width), y: -50, opacity: 255 };
+            break;
+          default:
+            newCircle = { x: p.random(p.width), y: p.random(p.height), opacity: 255 };
+        }
+        this.setState((prevState) => ({
+          circles: [...prevState.circles, newCircle]
+        }));
+      }
     };
 
     p.windowResized = () => {

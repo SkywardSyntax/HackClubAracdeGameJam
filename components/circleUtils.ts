@@ -63,3 +63,39 @@ export function limitBlackCircles(circles: Circle[], maxCircles: number): Circle
   }
   return circles;
 }
+
+export function spawnBlackCircleOutsideView(
+  p: p5,
+  playerPosition: Position,
+  playerVelocity: Velocity
+): Circle {
+  const edge = determineEdge(playerPosition, playerVelocity);
+  let newCircle;
+  switch (edge) {
+    case 'right':
+      newCircle = { x: p.width + 50, y: p.random(p.height), opacity: 255 };
+      break;
+    case 'left':
+      newCircle = { x: -50, y: p.random(p.height), opacity: 255 };
+      break;
+    case 'bottom':
+      newCircle = { x: p.random(p.width), y: p.height + 50, opacity: 255 };
+      break;
+    case 'top':
+      newCircle = { x: p.random(p.width), y: -50, opacity: 255 };
+      break;
+    default:
+      newCircle = { x: p.random(p.width), y: p.random(p.height), opacity: 255 };
+  }
+  return newCircle;
+}
+
+export function removeCircleFromArray(circles: Circle[], circle: Circle, createParticles: (circle: Circle) => Particle[]): void {
+  const index = circles.indexOf(circle);
+  if (index !== -1) {
+    circles.splice(index, 1);
+    const particles = createParticles(circle);
+    // Add particles to the game (assuming there's a global particles array)
+    // particlesArray.push(...particles);
+  }
+}

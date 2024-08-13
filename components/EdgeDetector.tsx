@@ -18,3 +18,25 @@ export function determineEdge(position: Position, velocity: Velocity): string {
     }
   }
 }
+
+export function determineClosestEdge(position: Position, initialPosition: Position): string {
+  const { x, y } = position;
+  const { x: initialX, y: initialY } = initialPosition;
+
+  const deltaX = x - initialX;
+  const deltaY = y - initialY;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX > 0) {
+      return 'right';
+    } else {
+      return 'left';
+    }
+  } else {
+    if (deltaY > 0) {
+      return 'bottom';
+    } else {
+      return 'top';
+    }
+  }
+}

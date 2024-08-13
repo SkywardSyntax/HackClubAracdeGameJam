@@ -114,6 +114,29 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
         // Remove circles that are out of view
         circles = circles.filter(circle => circle.x >= 0 && circle.x <= p.width && circle.y >= 0 && circle.y <= p.height);
+
+        // Add new black circles just outside the camera view when one exits
+        if (circles.length < 10) {
+          const edge = determineEdge(ivorySquare, velocity);
+          let newCircle;
+          switch (edge) {
+            case 'right':
+              newCircle = { x: p.width + 50, y: p.random(p.height), opacity: 255 };
+              break;
+            case 'left':
+              newCircle = { x: -50, y: p.random(p.height), opacity: 255 };
+              break;
+            case 'bottom':
+              newCircle = { x: p.random(p.width), y: p.height + 50, opacity: 255 };
+              break;
+            case 'top':
+              newCircle = { x: p.random(p.width), y: -50, opacity: 255 };
+              break;
+            default:
+              newCircle = { x: p.random(p.width), y: p.random(p.height), opacity: 255 };
+          }
+          circles.push(newCircle);
+        }
       }
     };
 
