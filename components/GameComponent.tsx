@@ -114,10 +114,12 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         velocity.y *= 0.9;
 
         p.fill(0);
-        circles.forEach((circle) => {
-          p.fill(0, 0, 0, circle.opacity);
-          p.ellipse(circle.x, circle.y, 50, 50);
-        });
+        if (circles) {
+          circles.forEach((circle) => {
+            p.fill(0, 0, 0, circle.opacity);
+            p.ellipse(circle.x, circle.y, 50, 50);
+          });
+        }
 
         p.checkGameOver();
         p.checkGameWin();

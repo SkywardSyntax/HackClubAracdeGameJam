@@ -5,9 +5,13 @@ export function checkAndAddBlackCircles(
   circles: Circle[],
   playerPosition: Position,
   playerVelocity: Velocity,
-  removeCircleFromArray: (circle: Circle) => void,
+  removeCircleFromArray: (circles: Circle[], circle: Circle, createParticles: (circle: Circle) => Particle[]) => void,
   limitBlackCircles: (circles: Circle[], maxCircles: number) => Circle[]
 ) {
+  if (!circles) {
+    return;
+  }
+
   circles.forEach((circle) => {
     if (
       playerPosition.x >= circle.x - 25 &&
@@ -15,7 +19,7 @@ export function checkAndAddBlackCircles(
       playerPosition.y >= circle.y - 25 &&
       playerPosition.y <= circle.y + 25
     ) {
-      removeCircleFromArray(circle);
+      removeCircleFromArray(circles, circle, createParticles);
     }
   });
 

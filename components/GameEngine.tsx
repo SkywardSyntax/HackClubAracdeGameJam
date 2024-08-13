@@ -15,6 +15,8 @@ interface GameEngineProps {
 
 interface GameEngineState {
   timer: number;
+  circles: { x: number, y: number, opacity: number }[];
+  ivorySquare: { x: number, y: number };
 }
 
 class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
@@ -28,7 +30,9 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
     super(props);
     this.myRef = React.createRef();
     this.state = {
-      timer: 60
+      timer: 60,
+      circles: [],
+      ivorySquare: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     };
     this.timerInterval = null;
   }
@@ -54,6 +58,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         } while (p.dist(x, y, ivorySquare.x, ivorySquare.y) < spawnRadius);
         circles.push({ x, y, opacity: 255 });
       }
+      this.setState({ circles });
     };
 
     p.draw = () => {
@@ -80,21 +85,25 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         velocity.y *= 0.9;
 
         p.fill(0);
-        circles.forEach((circle) => {
-          p.fill(0, 0, 0, circle.opacity);
-          p.ellipse(circle.x, circle.y, 50, 50);
-        });
+        if (circles) {
+          circles.forEach((circle) => {
+            p.fill(0, 0, 0, circle.opacity);
+            p.ellipse(circle.x, circle.y, 50, 50);
+          });
+        }
 
-        this.particles.forEach((particle, index) => {
-          p.fill(0, 0, 0, particle.opacity);
-          p.ellipse(particle.x, particle.y, 5, 5);
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.opacity -= 5;
-          if (particle.opacity <= 0) {
-            this.particles = this.particles.filter((_, i) => i !== index);
-          }
-        });
+        if (this.particles) {
+          this.particles.forEach((particle, index) => {
+            p.fill(0, 0, 0, particle.opacity);
+            p.ellipse(particle.x, particle.y, 5, 5);
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.opacity -= 5;
+            if (particle.opacity <= 0) {
+              this.particles = this.particles.filter((_, i) => i !== index);
+            }
+          });
+        }
 
         p.checkGameOver();
         p.checkGameWin();
@@ -171,7 +180,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   render() {
     return (
       <div>
-        <IvorySquare circles={this.state.circles} />
+        <IvorySquare circles={this.state.circles} timer={this.state.timer} />
         <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} />
         <div ref={this.myRef}></div>
       </div>

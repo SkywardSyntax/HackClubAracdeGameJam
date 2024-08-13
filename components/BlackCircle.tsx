@@ -52,23 +52,27 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       p.background('#EDC9AF');
       p.fill(0);
       p.noStroke();
-      this.state.circles.forEach((circle) => {
-        p.fill(0, 0, 0, circle.opacity);
-        p.ellipse(circle.x, circle.y, 50, 50);
-      });
+      if (this.state.circles) {
+        this.state.circles.forEach((circle) => {
+          p.fill(0, 0, 0, circle.opacity);
+          p.ellipse(circle.x, circle.y, 50, 50);
+        });
+      }
 
-      this.state.particles.forEach((particle, index) => {
-        p.fill(0, 0, 0, particle.opacity);
-        p.ellipse(particle.x, particle.y, 5, 5);
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        particle.opacity -= 5;
-        if (particle.opacity <= 0) {
-          this.setState((prevState) => ({
-            particles: prevState.particles.filter((_, i) => i !== index)
-          }));
-        }
-      });
+      if (this.state.particles) {
+        this.state.particles.forEach((particle, index) => {
+          p.fill(0, 0, 0, particle.opacity);
+          p.ellipse(particle.x, particle.y, 5, 5);
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.opacity -= 5;
+          if (particle.opacity <= 0) {
+            this.setState((prevState) => ({
+              particles: prevState.particles.filter((_, i) => i !== index)
+            }));
+          }
+        });
+      }
 
       checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray, limitBlackCircles);
 

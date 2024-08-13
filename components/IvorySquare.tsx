@@ -13,10 +13,12 @@ interface State {
   lastDashTime: number;
   lastSpacePressTime: number;
   size: number;
+  timer: number;
 }
 
 interface Props {
   circles: Circle[];
+  timer: number;
 }
 
 class IvorySquare extends React.Component<Props, State> {
@@ -35,7 +37,8 @@ class IvorySquare extends React.Component<Props, State> {
       dashCooldown: 0,
       lastDashTime: 0,
       lastSpacePressTime: 0,
-      size: 50
+      size: 50,
+      timer: 0
     };
   }
 
@@ -43,12 +46,14 @@ class IvorySquare extends React.Component<Props, State> {
     const proximityThreshold = 100;
     let isCloseToBlackCircle = false;
 
-    this.props.circles.forEach((circle) => {
-      const distance = p.dist(this.state.position.x, this.state.position.y, circle.x, circle.y);
-      if (distance < proximityThreshold) {
-        isCloseToBlackCircle = true;
-      }
-    });
+    if (this.props.circles) {
+      this.props.circles.forEach((circle) => {
+        const distance = p.dist(this.state.position.x, this.state.position.y, circle.x, circle.y);
+        if (distance < proximityThreshold) {
+          isCloseToBlackCircle = true;
+        }
+      });
+    }
 
     if (isCloseToBlackCircle) {
       const time = p.millis() / 1000;
@@ -121,6 +126,9 @@ class IvorySquare extends React.Component<Props, State> {
       }));
 
       p.pop();
+
+      // Update the timer state
+      this.setState({ timer: this.props.timer });
     };
 
     p.keyPressed = () => {
@@ -152,6 +160,7 @@ class IvorySquare extends React.Component<Props, State> {
       <div>
         <Camera playerPosition={this.state.position} zoomLevel={1} />
         <div ref={this.myRef}></div>
+        <div className="timer">Timer: {this.state.timer}</div>
       </div>
     );
   }
