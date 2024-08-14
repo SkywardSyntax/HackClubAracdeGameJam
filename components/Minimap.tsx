@@ -5,6 +5,7 @@ interface MinimapProps {
   playerPosition: { x: number, y: number };
   circles: { x: number, y: number }[];
   ivorySquare: { x: number, y: number };
+  style?: React.CSSProperties;
 }
 
 class Minimap extends React.Component<MinimapProps> {
@@ -35,6 +36,25 @@ class Minimap extends React.Component<MinimapProps> {
         p.rect(this.props.playerPosition.x / 10, this.props.playerPosition.y / 10, 5, 5);
         p.fill(255, 255, 0);
         p.rect(this.props.ivorySquare.x / 10, this.props.ivorySquare.y / 10, 5, 5);
+
+        // Add logic to ensure the player ivory square pulses if it's near black circles
+        const proximityThreshold = 100;
+        let isCloseToBlackCircle = false;
+
+        this.props.circles.forEach((circle) => {
+          const distance = p.dist(this.props.ivorySquare.x, this.props.ivorySquare.y, circle.x, circle.y);
+          if (distance < proximityThreshold) {
+            isCloseToBlackCircle = true;
+          }
+        });
+
+        if (isCloseToBlackCircle) {
+          const time = p.millis() / 1000;
+          const pulsateFactor = 1 + 0.1 * p.sin(time * 2 * p.PI);
+          p.rect(this.props.ivorySquare.x / 10, this.props.ivorySquare.y / 10, 5 * pulsateFactor, 5 * pulsateFactor);
+        } else {
+          p.rect(this.props.ivorySquare.x / 10, this.props.ivorySquare.y / 10, 5, 5);
+        }
       } catch (error) {
         console.error('Error in Minimap draw method:', error);
       }
@@ -53,7 +73,7 @@ class Minimap extends React.Component<MinimapProps> {
   }
 
   render() {
-    return <div ref={this.myRef} style={{ position: 'absolute', top: 0, left: 0, width: '200px', height: '200px', border: '1px solid black' }}></div>;
+    return <div ref={this.myRef} className="minimap" style={this.props.style}></div>;
   }
 }
 

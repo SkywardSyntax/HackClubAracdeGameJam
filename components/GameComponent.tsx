@@ -248,7 +248,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
   render() {
     return (
       <div>
-        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} />
+        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} style={{ top: '10px', left: '10px', width: '200px', height: '200px', zIndex: 2 }} />
         <div ref={this.myRef}></div>
       </div>
     );

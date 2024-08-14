@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from '../components/Game.module.css';
 import GameComponent from '../components/GameEngine';
+import Minimap from '../components/Minimap';
 
 interface GameProps {}
 
@@ -29,6 +30,7 @@ const Game: React.FC<GameProps> = () => {
 
   return (
     <div className={styles.desertBackground}>
+      <Minimap />
       {!gameStarted && !gameOver && !gameWon && (
         <button onClick={startGame} className={styles.startButton}>
           Start Game
