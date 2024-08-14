@@ -179,7 +179,9 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (this.myRef.current) {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   render() {
