@@ -47,7 +47,9 @@ class Camera extends React.Component<CameraProps, CameraState> {
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (this.myRef.current) {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   componentDidUpdate(prevProps: CameraProps) {

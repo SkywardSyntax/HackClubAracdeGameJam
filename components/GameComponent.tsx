@@ -1,8 +1,8 @@
 import React from 'react';
 import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
-import { Position, Velocity } from './types';
-import { checkAndAddBlackCircles, removeCircle } from './circleUtils';
+import { Position, Velocity, Particle } from './types';
+import { checkAndAddBlackCircles, removeCircleFromArray, createParticles, limitBlackCircles } from './circleUtils';
 import Minimap from './Minimap';
 
 interface GameComponentProps {
@@ -20,12 +20,15 @@ interface GameComponentState {
   lastSpacePressTime: number;
   ivorySquare: Position;
   circles: { x: number, y: number, opacity: number }[];
+  velocity: Velocity;
+  particles: Particle[];
 }
 
 class GameComponent extends React.Component<GameComponentProps, GameComponentState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
   private previousPositions: { x: number, y: number }[] = [];
+  private myP5: p5 | undefined;
 
   constructor(props: GameComponentProps) {
     super(props);
@@ -38,7 +41,9 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
       lastDashTime: 0,
       lastSpacePressTime: 0,
       ivorySquare: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-      circles: []
+      circles: [],
+      velocity: { x: 0, y: 0 },
+      particles: []
     };
     this.timerInterval = null;
   }
@@ -129,8 +134,8 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
             });
           }
 
-          p.checkGameOver();
-          p.checkGameWin();
+          this.checkGameOver();
+          this.checkGameWin();
 
           // Adjust camera position
           cameraOffset.x = this.state.ivorySquare.x - p.width / 2;
@@ -139,7 +144,7 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
           p.pop();
 
           // Check and add black circles
-          checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, cameraOffset, this.removeCircle);
+          checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, removeCircleFromArray, limitBlackCircles);
 
           // Store the current position of the ivory square
           this.previousPositions.push({ x: this.state.ivorySquare.x, y: this.state.ivorySquare.y });
@@ -169,54 +174,42 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
         ivorySquare: { x: p.windowWidth / 2, y: p.windowHeight / 2 }
       });
     };
+  };
 
-    p.checkGameOver = () => {
-      circles.forEach((circle) => {
-        if (
-          this.state.ivorySquare.x >= circle.x - 25 &&
-          this.state.ivorySquare.x <= circle.x + 25 &&
-          this.state.ivorySquare.y >= circle.y - 25 &&
-          this.state.ivorySquare.y <= circle.y + 25
-        ) {
-          this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds
-          if (this.state.timer <= 0) {
-            gameOver = true;
-            this.props.onGameOver();
-          } else {
-            // Set the ivory square back 30 seconds in space and time
-            const resetPosition = this.previousPositions[0];
-            this.setState({
-              ivorySquare: { x: resetPosition.x, y: resetPosition.y }
-            });
-            lastResetTime = Date.now();
-            removeCircle(circles, circle, this.createParticles); // Remove the black circle upon collision
-            this.previousPositions = []; // Clear the previous positions
-          }
+  checkGameOver = () => {
+    this.state.circles.forEach((circle) => {
+      if (
+        this.state.ivorySquare.x >= circle.x - 25 &&
+        this.state.ivorySquare.x <= circle.x + 25 &&
+        this.state.ivorySquare.y >= circle.y - 25 &&
+        this.state.ivorySquare.y <= circle.y + 25
+      ) {
+        this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds
+        if (this.state.timer <= 0) {
+          this.props.onGameOver();
+        } else {
+          // Set the ivory square back 30 seconds in space and time
+          const resetPosition = this.previousPositions[0];
+          this.setState({
+            ivorySquare: { x: resetPosition.x, y: resetPosition.y }
+          });
+          removeCircleFromArray(this.state.circles, circle, createParticles); // Remove the black circle upon collision
+          this.previousPositions = []; // Clear the previous positions
         }
-      });
-    };
-
-    p.checkGameWin = () => {
-      if (this.state.ivorySquare.y <= 0) {
-        gameOver = true;
-        this.props.onGameWin();
       }
-    };
+    });
+  };
 
-    this.createParticles = (circle: { x: number, y: number, opacity: number }) => {
-      const particles = Array.from({ length: 20 }, () => ({
-        x: circle.x,
-        y: circle.y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        opacity: 255
-      }));
-      this.particles = [...this.particles, ...particles];
-    };
+  checkGameWin = () => {
+    if (this.state.ivorySquare.y <= 0) {
+      this.props.onGameWin();
+    }
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (this.myRef.current) {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   componentDidUpdate(prevProps: GameComponentProps) {
@@ -248,7 +241,10 @@ class GameComponent extends React.Component<GameComponentProps, GameComponentSta
   render() {
     return (
       <div>
-        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} style={{ top: '10px', left: '10px', width: '200px', height: '200px', zIndex: 2 }} />
+        <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} style={{ top: '10px', left: '10px', width: '200px', height: '200px', zIndex: 2 }} ivorySquare={{
+          x: 0,
+          y: 0
+        }} />
         <div ref={this.myRef}></div>
       </div>
     );

@@ -30,7 +30,7 @@ const Game: React.FC<GameProps> = () => {
 
   return (
     <div className={styles.desertBackground}>
-      <Minimap />
+      <Minimap playerPosition={{ x: 0, y: 0 }} circles={[]} ivorySquare={{ x: 0, y: 0 }} />
       {!gameStarted && !gameOver && !gameWon && (
         <button onClick={startGame} className={styles.startButton}>
           Start Game

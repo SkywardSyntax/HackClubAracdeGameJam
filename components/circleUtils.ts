@@ -1,4 +1,6 @@
+import p5 from 'p5';
 import { Circle, Particle, Position, Velocity } from './types';
+import { determineEdge } from './EdgeDetector';
 import LoopholeEnforcer from './LoopholeEnforcer';
 
 export function checkAndAddBlackCircles(
@@ -25,7 +27,7 @@ export function checkAndAddBlackCircles(
       }
     });
 
-    if (LoopholeEnforcer.canRenderNewCircle(circles, playerPosition)) {
+    if (canRenderNewCircle(circles, playerPosition)) {
       spawnBlackCircles(p, circles, playerPosition);
     }
     circles = limitBlackCircles(circles, 10);
@@ -119,4 +121,17 @@ export function removeCircleFromArray(circles: Circle[], circle: Circle, createP
   }
 
   circles = limitBlackCircles(circles, 10);
+}
+
+export function canRenderNewCircle(circles: Circle[], playerPosition: Position): boolean {
+  const visibleCircles = circles.filter(circle => {
+    return (
+      circle.x >= playerPosition.x - window.innerWidth / 2 &&
+      circle.x <= playerPosition.x + window.innerWidth / 2 &&
+      circle.y >= playerPosition.y - window.innerHeight / 2 &&
+      circle.y <= playerPosition.y + window.innerHeight / 2
+    );
+  });
+
+  return visibleCircles.length < 10;
 }

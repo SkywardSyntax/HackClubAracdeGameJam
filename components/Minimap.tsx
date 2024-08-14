@@ -1,12 +1,19 @@
 import React from 'react';
 import p5 from 'p5';
 
+
 interface MinimapProps {
+
   playerPosition: { x: number, y: number };
+
   circles: { x: number, y: number }[];
+
   ivorySquare: { x: number, y: number };
+
   style?: React.CSSProperties;
+
 }
+
 
 class Minimap extends React.Component<MinimapProps> {
   private myRef: React.RefObject<HTMLDivElement>;
@@ -75,7 +82,7 @@ class Minimap extends React.Component<MinimapProps> {
   };
 
   componentDidMount() {
-    if (typeof window !== 'undefined') {
+    if (this.myRef.current) {
       this.myP5 = new p5(this.Sketch, this.myRef.current);
     }
   }
@@ -83,7 +90,9 @@ class Minimap extends React.Component<MinimapProps> {
   componentDidUpdate() {
     if (this.myP5) {
       this.myP5.remove();
-      this.myP5 = new p5(this.Sketch, this.myRef.current);
+      if (this.myRef.current) {
+        this.myP5 = new p5(this.Sketch, this.myRef.current);
+      }
     }
   }
 

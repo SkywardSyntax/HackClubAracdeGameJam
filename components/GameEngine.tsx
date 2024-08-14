@@ -19,6 +19,12 @@ interface GameEngineState {
   ivorySquare: { x: number, y: number };
 }
 
+interface LoopholeEnforcerProps {
+  circles: { x: number, y: number, opacity: number }[];
+  playerPosition: { x: number, y: number };
+  canRenderNewCircle: (circles: { x: number, y: number, opacity: number }[], playerPosition: { x: number, y: number }) => boolean;
+}
+
 class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   private myRef: React.RefObject<HTMLDivElement>;
   private timerInterval: NodeJS.Timeout | null;
@@ -109,8 +115,8 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
             });
           }
 
-          p.checkGameOver();
-          p.checkGameWin();
+          this.checkGameOver();
+          this.checkGameWin();
 
           // Adjust camera position
           cameraOffset.x = this.state.ivorySquare.x - p.width / 2;
@@ -119,9 +125,7 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
           p.pop();
 
           // Check and add black circles
-          if (LoopholeEnforcer.canRenderNewCircle(circles, this.state.ivorySquare)) {
-            checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, this.removeCircleFromArray, limitBlackCircles);
-          }
+          checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, removeCircleFromArray, limitBlackCircles);
 
           // Store the current position of the ivory square
           this.previousPositions.push({ x: this.state.ivorySquare.x, y: this.state.ivorySquare.y });
@@ -154,43 +158,42 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
         ivorySquare: { x: p.windowWidth / 2, y: p.windowHeight / 2 }
       });
     };
+  };
 
-    p.checkGameOver = () => {
-      circles.forEach((circle) => {
-        if (
-          this.state.ivorySquare.x >= circle.x - 25 &&
-          this.state.ivorySquare.x <= circle.x + 25 &&
-          this.state.ivorySquare.y >= circle.y - 25 &&
-          this.state.ivorySquare.y <= circle.y + 25
-        ) {
-          this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds
-          if (this.state.timer <= 0) {
-            gameOver = true;
-            this.props.onGameOver();
-          } else {
-            // Set the ivory square back 30 seconds in space and time
-            const resetPosition = this.previousPositions[0];
-            this.setState({
-              ivorySquare: { x: resetPosition.x, y: resetPosition.y }
-            });
-            lastResetTime = Date.now();
-            removeCircleFromArray(circles, circle, createParticles); // Remove the black circle upon collision
-            this.previousPositions = []; // Clear the previous positions
-          }
+  checkGameOver = () => {
+    this.state.circles.forEach((circle) => {
+      if (
+        this.state.ivorySquare.x >= circle.x - 25 &&
+        this.state.ivorySquare.x <= circle.x + 25 &&
+        this.state.ivorySquare.y >= circle.y - 25 &&
+        this.state.ivorySquare.y <= circle.y + 25
+      ) {
+        this.setState((prevState) => ({ timer: prevState.timer - 30 })); // Decrement timer by 30 seconds
+        if (this.state.timer <= 0) {
+          this.props.onGameOver();
+        } else {
+          // Set the ivory square back 30 seconds in space and time
+          const resetPosition = this.previousPositions[0];
+          this.setState({
+            ivorySquare: { x: resetPosition.x, y: resetPosition.y }
+          });
+          removeCircleFromArray(this.state.circles, circle, createParticles); // Remove the black circle upon collision
+          this.previousPositions = []; // Clear the previous positions
         }
-      });
-    };
-
-    p.checkGameWin = () => {
-      if (this.state.ivorySquare.y <= 0) {
-        gameOver = true;
-        this.props.onGameWin();
       }
-    };
+    });
+  };
+
+  checkGameWin = () => {
+    if (this.state.ivorySquare.y <= 0) {
+      this.props.onGameWin();
+    }
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (this.myRef.current) {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   render() {

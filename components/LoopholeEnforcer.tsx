@@ -5,8 +5,8 @@ interface LoopholeEnforcerProps {
   playerPosition: { x: number, y: number };
 }
 
-const LoopholeEnforcer: React.FC<LoopholeEnforcerProps> = ({ circles, playerPosition }) => {
-  const canRenderNewCircle = () => {
+class LoopholeEnforcer extends React.Component<LoopholeEnforcerProps> {
+  static canRenderNewCircle(circles: { x: number, y: number, opacity: number }[], playerPosition: { x: number, y: number }) {
     const visibleCircles = circles.filter(circle => {
       return (
         circle.x >= playerPosition.x - window.innerWidth / 2 &&
@@ -17,13 +17,15 @@ const LoopholeEnforcer: React.FC<LoopholeEnforcerProps> = ({ circles, playerPosi
     });
 
     return visibleCircles.length < 10;
-  };
+  }
 
-  return (
-    <div>
-      {canRenderNewCircle() ? "OK to render new circle" : "Cannot render new circle"}
-    </div>
-  );
-};
+  render() {
+    return (
+      <div>
+        {LoopholeEnforcer.canRenderNewCircle(this.props.circles, this.props.playerPosition) ? "OK to render new circle" : "Cannot render new circle"}
+      </div>
+    );
+  }
+}
 
 export default LoopholeEnforcer;

@@ -1,8 +1,9 @@
 import React from 'react';
 import p5 from 'p5';
-import { Position, Velocity, Circle } from './types';
+import { Position, Velocity, Circle, Particle } from './types';
 import Camera from './Camera';
 import Minimap from './Minimap';
+import { createParticles } from './circleUtils';
 
 interface State {
   position: Position;
@@ -157,14 +158,19 @@ class IvorySquare extends React.Component<Props, State> {
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (this.myRef.current) {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   render() {
     return (
       <div>
         <Camera playerPosition={this.state.position} zoomLevel={1} />
-        <Minimap playerPosition={this.state.position} circles={this.props.circles} />
+        <Minimap playerPosition={this.state.position} circles={this.props.circles} ivorySquare={{
+          x: 0,
+          y: 0
+        }} />
         <div ref={this.myRef}></div>
         <div className="timer">Timer: {this.state.timer}</div>
       </div>
