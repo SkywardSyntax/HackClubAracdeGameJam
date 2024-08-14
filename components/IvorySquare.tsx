@@ -2,6 +2,7 @@ import React from 'react';
 import p5 from 'p5';
 import { Position, Velocity, Circle } from './types';
 import Camera from './Camera';
+import Minimap from './Minimap';
 
 interface State {
   position: Position;
@@ -29,7 +30,7 @@ class IvorySquare extends React.Component<Props, State> {
     super(props);
     this.myRef = React.createRef();
     this.state = {
-      position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      position: { x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 },
       velocity: { x: 0, y: 0 },
       keysPressed: {},
       cameraOffset: { x: 0, y: 0 },
@@ -71,64 +72,68 @@ class IvorySquare extends React.Component<Props, State> {
     };
 
     p.draw = () => {
-      p.background('#EDC9AF');
-      p.push();
-      p.translate(-this.state.cameraOffset.x, -this.state.cameraOffset.y);
+      try {
+        p.background('#EDC9AF');
+        p.push();
+        p.translate(-this.state.cameraOffset.x, -this.state.cameraOffset.y);
 
-      this.pulsateIvorySquare(p);
+        this.pulsateIvorySquare(p);
 
-      p.fill('#F5F5DC');
-      p.noStroke();
-      p.rect(this.state.position.x, this.state.position.y, this.state.size, this.state.size);
+        p.fill('#F5F5DC');
+        p.noStroke();
+        p.rect(this.state.position.x, this.state.position.y, this.state.size, this.state.size);
 
-      if (this.state.keysPressed['ArrowUp']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y - 1.5 } }));
-      if (this.state.keysPressed['ArrowDown']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y + 1.5 } }));
-      if (this.state.keysPressed['ArrowLeft']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x - 1.5 } }));
-      if (this.state.keysPressed['ArrowRight']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x + 1.5 } }));
+        if (this.state.keysPressed['ArrowUp']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y - 1.5 } }));
+        if (this.state.keysPressed['ArrowDown']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, y: prevState.velocity.y + 1.5 } }));
+        if (this.state.keysPressed['ArrowLeft']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x - 1.5 } }));
+        if (this.state.keysPressed['ArrowRight']) this.setState((prevState) => ({ velocity: { ...prevState.velocity, x: prevState.velocity.x + 1.5 } }));
 
-      if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
-        const currentTime = p.millis();
-        if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+        if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
+          const currentTime = p.millis();
+          if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+            this.setState((prevState) => ({
+              isDashing: true,
+              dashCooldown: 60, // Cooldown period of 60 frames
+              lastDashTime: currentTime,
+              velocity: {
+                x: prevState.velocity.x * 2,
+                y: prevState.velocity.y * 2
+              }
+            }));
+          }
+          this.setState({ lastSpacePressTime: currentTime });
+        }
+
+        if (this.state.isDashing) {
           this.setState((prevState) => ({
-            isDashing: true,
-            dashCooldown: 60, // Cooldown period of 60 frames
-            lastDashTime: currentTime,
-            velocity: {
-              x: prevState.velocity.x * 2,
-              y: prevState.velocity.y * 2
-            }
+            isDashing: false
           }));
         }
-        this.setState({ lastSpacePressTime: currentTime });
-      }
 
-      if (this.state.isDashing) {
-        this.setState((prevState) => ({
-          isDashing: false
-        }));
-      }
-
-      if (this.state.dashCooldown > 0) {
-        this.setState((prevState) => ({
-          dashCooldown: prevState.dashCooldown - 1
-        }));
-      }
-
-      this.setState((prevState) => ({
-        position: {
-          x: prevState.position.x + prevState.velocity.x,
-          y: prevState.position.y + prevState.velocity.y
-        },
-        velocity: {
-          x: prevState.velocity.x * 0.9,
-          y: prevState.velocity.y * 0.9
+        if (this.state.dashCooldown > 0) {
+          this.setState((prevState) => ({
+            dashCooldown: prevState.dashCooldown - 1
+          }));
         }
-      }));
 
-      p.pop();
+        this.setState((prevState) => ({
+          position: {
+            x: prevState.position.x + prevState.velocity.x,
+            y: prevState.position.y + prevState.velocity.y
+          },
+          velocity: {
+            x: prevState.velocity.x * 0.9,
+            y: prevState.velocity.y * 0.9
+          }
+        }));
 
-      // Update the timer state
-      this.setState({ timer: this.props.timer });
+        p.pop();
+
+        // Update the timer state
+        this.setState({ timer: this.props.timer });
+      } catch (error) {
+        console.error('Error during game loop:', error);
+      }
     };
 
     p.keyPressed = () => {
@@ -159,6 +164,7 @@ class IvorySquare extends React.Component<Props, State> {
     return (
       <div>
         <Camera playerPosition={this.state.position} zoomLevel={1} />
+        <Minimap playerPosition={this.state.position} circles={this.props.circles} />
         <div ref={this.myRef}></div>
         <div className="timer">Timer: {this.state.timer}</div>
       </div>

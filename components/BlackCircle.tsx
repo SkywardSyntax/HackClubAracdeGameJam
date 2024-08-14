@@ -49,78 +49,88 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     };
 
     p.draw = () => {
-      p.background('#EDC9AF');
-      p.fill(0);
-      p.noStroke();
-      if (this.state.circles) {
-        this.state.circles.forEach((circle) => {
-          p.fill(0, 0, 0, circle.opacity);
-          p.ellipse(circle.x, circle.y, 50, 50);
-        });
-      }
+      try {
+        p.background('#EDC9AF');
+        p.fill(0);
+        p.noStroke();
+        if (this.state.circles) {
+          this.state.circles.forEach((circle) => {
+            p.fill(0, 0, 0, circle.opacity);
+            p.ellipse(circle.x, circle.y, 50, 50);
+          });
+        }
 
-      if (this.state.particles) {
-        this.state.particles.forEach((particle, index) => {
-          p.fill(0, 0, 0, particle.opacity);
-          p.ellipse(particle.x, particle.y, 5, 5);
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.opacity -= 5;
-          if (particle.opacity <= 0) {
+        if (this.state.particles) {
+          this.state.particles.forEach((particle, index) => {
+            p.fill(0, 0, 0, particle.opacity);
+            p.ellipse(particle.x, particle.y, 5, 5);
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.opacity -= 5;
+            if (particle.opacity <= 0) {
+              this.setState((prevState) => ({
+                particles: prevState.particles.filter((_, i) => i !== index)
+              }));
+            }
+          });
+        }
+
+        checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray, limitBlackCircles);
+
+        if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
+          const currentTime = p.millis();
+          if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
             this.setState((prevState) => ({
-              particles: prevState.particles.filter((_, i) => i !== index)
+              isDashing: true,
+              dashCooldown: 60, // Cooldown period of 60 frames
+              lastDashTime: currentTime,
+              playerVelocity: {
+                x: prevState.playerVelocity.x * 2,
+                y: prevState.playerVelocity.y * 2
+              }
             }));
           }
-        });
-      }
+          this.setState({ lastSpacePressTime: currentTime });
+        }
 
-      checkAndAddBlackCircles(p, this.state.circles, this.state.playerPosition, this.state.playerVelocity, removeCircleFromArray, limitBlackCircles);
-
-      if (this.state.keysPressed[' '] && !this.state.isDashing && this.state.dashCooldown <= 0) {
-        const currentTime = p.millis();
-        if (currentTime - this.state.lastSpacePressTime < 300) { // Double-tap detection within 300ms
+        if (this.state.isDashing) {
           this.setState((prevState) => ({
-            isDashing: true,
-            dashCooldown: 60, // Cooldown period of 60 frames
-            lastDashTime: currentTime,
-            playerVelocity: {
-              x: prevState.playerVelocity.x * 2,
-              y: prevState.playerVelocity.y * 2
-            }
+            isDashing: false
           }));
         }
-        this.setState({ lastSpacePressTime: currentTime });
-      }
 
-      if (this.state.isDashing) {
-        this.setState((prevState) => ({
-          isDashing: false
-        }));
-      }
-
-      if (this.state.dashCooldown > 0) {
-        this.setState((prevState) => ({
-          dashCooldown: prevState.dashCooldown - 1
-        }));
-      }
-
-      // Update player position based on velocity
-      this.setState((prevState) => ({
-        playerPosition: {
-          x: prevState.playerPosition.x + prevState.playerVelocity.x,
-          y: prevState.playerPosition.y + prevState.playerVelocity.y
-        },
-        playerVelocity: {
-          x: prevState.playerVelocity.x * 0.9,
-          y: prevState.playerVelocity.y * 0.9
+        if (this.state.dashCooldown > 0) {
+          this.setState((prevState) => ({
+            dashCooldown: prevState.dashCooldown - 1
+          }));
         }
-      }));
 
-      // Ensure no more than 10 black circles are on the screen at any time
-      if (this.state.circles.length > 10) {
+        // Update player position based on velocity
         this.setState((prevState) => ({
-          circles: prevState.circles.slice(0, 10)
+          playerPosition: {
+            x: prevState.playerPosition.x + prevState.playerVelocity.x,
+            y: prevState.playerPosition.y + prevState.playerVelocity.y
+          },
+          playerVelocity: {
+            x: prevState.playerVelocity.x * 0.9,
+            y: prevState.playerVelocity.y * 0.9
+          }
         }));
+
+        // Ensure no more than 10 black circles are on the screen at any time
+        if (this.state.circles.length > 10) {
+          this.setState((prevState) => ({
+            circles: prevState.circles.slice(0, 10)
+          }));
+        }
+
+        // Update the state with the current positions of the player and circles
+        this.setState((prevState) => ({
+          playerPosition: { ...prevState.playerPosition },
+          circles: [...prevState.circles]
+        }));
+      } catch (error) {
+        console.error('Error during rendering process:', error);
       }
     };
 

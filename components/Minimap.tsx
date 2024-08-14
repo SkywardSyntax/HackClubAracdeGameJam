@@ -4,6 +4,7 @@ import p5 from 'p5';
 interface MinimapProps {
   playerPosition: { x: number, y: number };
   circles: { x: number, y: number }[];
+  ivorySquare: { x: number, y: number };
 }
 
 class Minimap extends React.Component<MinimapProps> {
@@ -21,18 +22,34 @@ class Minimap extends React.Component<MinimapProps> {
     };
 
     p.draw = () => {
-      p.background(255);
-      p.fill(0);
-      this.props.circles.forEach((circle) => {
-        p.ellipse(circle.x / 10, circle.y / 10, 5, 5);
-      });
-      p.fill(255, 0, 0);
-      p.rect(this.props.playerPosition.x / 10, this.props.playerPosition.y / 10, 5, 5);
+      try {
+        if (!this.props.playerPosition) {
+          throw new Error('playerPosition is undefined');
+        }
+        p.background(255);
+        p.fill(0);
+        this.props.circles.forEach((circle) => {
+          p.ellipse(circle.x / 10, circle.y / 10, 5, 5);
+        });
+        p.fill(255, 0, 0);
+        p.rect(this.props.playerPosition.x / 10, this.props.playerPosition.y / 10, 5, 5);
+        p.fill(255, 255, 0);
+        p.rect(this.props.ivorySquare.x / 10, this.props.ivorySquare.y / 10, 5, 5);
+      } catch (error) {
+        console.error('Error in Minimap draw method:', error);
+      }
     };
   };
 
   componentDidMount() {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
+  }
+
+  componentDidUpdate() {
+    if (this.myP5) {
+      this.myP5.remove();
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   render() {
