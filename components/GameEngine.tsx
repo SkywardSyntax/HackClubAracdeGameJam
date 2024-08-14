@@ -4,8 +4,8 @@ import { determineEdge } from './EdgeDetector';
 import { Particle } from './types';
 import { checkAndAddBlackCircles, removeCircleFromArray, createParticles, limitBlackCircles } from './circleUtils';
 import Camera from './Camera';
-import IvorySquare from './IvorySquare';
 import Minimap from './Minimap';
+import LoopholeEnforcer from './LoopholeEnforcer';
 
 interface GameEngineProps {
   gameStarted: boolean;
@@ -118,10 +118,12 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
 
           p.pop();
 
-        // Check and add black circles
-          checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, this.removeCircleFromArray, limitBlackCircles);
+          // Check and add black circles
+          if (LoopholeEnforcer.canRenderNewCircle(circles, this.state.ivorySquare)) {
+            checkAndAddBlackCircles(p, circles, this.state.ivorySquare, velocity, this.removeCircleFromArray, limitBlackCircles);
+          }
 
-        // Store the current position of the ivory square
+          // Store the current position of the ivory square
           this.previousPositions.push({ x: this.state.ivorySquare.x, y: this.state.ivorySquare.y });
           if (this.previousPositions.length > 1800) {
             this.previousPositions.shift(); // Keep only the last 30 seconds of positions (assuming 60 FPS)
@@ -194,7 +196,6 @@ class GameEngine extends React.Component<GameEngineProps, GameEngineState> {
   render() {
     return (
       <div>
-        <IvorySquare circles={this.state.circles} timer={this.state.timer} />
         <Minimap playerPosition={this.state.ivorySquare} circles={this.state.circles} ivorySquare={this.state.ivorySquare} />
         <div ref={this.myRef}></div>
       </div>

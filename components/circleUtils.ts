@@ -1,4 +1,5 @@
 import { Circle, Particle, Position, Velocity } from './types';
+import LoopholeEnforcer from './LoopholeEnforcer';
 
 export function checkAndAddBlackCircles(
   p: p5,
@@ -24,7 +25,9 @@ export function checkAndAddBlackCircles(
       }
     });
 
-    spawnBlackCircles(p, circles, playerPosition);
+    if (LoopholeEnforcer.canRenderNewCircle(circles, playerPosition)) {
+      spawnBlackCircles(p, circles, playerPosition);
+    }
     circles = limitBlackCircles(circles, 10);
   } catch (error) {
     console.error('Error in checkAndAddBlackCircles:', error);

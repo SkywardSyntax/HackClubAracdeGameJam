@@ -3,6 +3,7 @@ import p5 from 'p5';
 import { determineEdge } from './EdgeDetector';
 import { Circle, Particle } from './types';
 import { checkAndAddBlackCircles, removeCircleFromArray, limitBlackCircles } from './circleUtils';
+import LoopholeEnforcer from './LoopholeEnforcer';
 
 interface BlackCirclesState {
   circles: Circle[];
@@ -14,6 +15,7 @@ interface BlackCirclesState {
   dashCooldown: number;
   lastDashTime: number;
   lastSpacePressTime: number;
+  size: number;
 }
 
 class BlackCircles extends React.Component<{}, BlackCirclesState> {
@@ -32,9 +34,32 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
       isDashing: false,
       dashCooldown: 0,
       lastDashTime: 0,
-      lastSpacePressTime: 0
+      lastSpacePressTime: 0,
+      size: 50
     };
   }
+
+  pulsateIvorySquare = (p: p5) => {
+    const proximityThreshold = 100;
+    let isCloseToBlackCircle = false;
+
+    if (this.state.circles) {
+      this.state.circles.forEach((circle) => {
+        const distance = p.dist(this.state.playerPosition.x, this.state.playerPosition.y, circle.x, circle.y);
+        if (distance < proximityThreshold) {
+          isCloseToBlackCircle = true;
+        }
+      });
+    }
+
+    if (isCloseToBlackCircle) {
+      const time = p.millis() / 1000;
+      const pulsateFactor = 1 + 0.1 * p.sin(time * 2 * p.PI);
+      this.setState({ size: 50 * pulsateFactor });
+    } else {
+      this.setState({ size: 50 });
+    }
+  };
 
   Sketch = (p: p5) => {
     p.setup = () => {
@@ -117,6 +142,8 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
           }
         }));
 
+        this.pulsateIvorySquare(p);
+
         // Ensure no more than 10 black circles are on the screen at any time
         if (this.state.circles.length > 10) {
           this.setState((prevState) => ({
@@ -156,7 +183,12 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
   }
 
   render() {
-    return <div ref={this.myRef}></div>;
+    return (
+      <div>
+        <div ref={this.myRef}></div>
+        <LoopholeEnforcer circles={this.state.circles} playerPosition={this.state.playerPosition} />
+      </div>
+    );
   }
 }
 

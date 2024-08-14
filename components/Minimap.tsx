@@ -15,6 +15,19 @@ class Minimap extends React.Component<MinimapProps> {
   constructor(props: MinimapProps) {
     super(props);
     this.myRef = React.createRef();
+    if (typeof window !== 'undefined') {
+      this.state = {
+        playerPosition: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+        circles: [],
+        ivorySquare: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      };
+    } else {
+      this.state = {
+        playerPosition: { x: 0, y: 0 },
+        circles: [],
+        ivorySquare: { x: 0, y: 0 }
+      };
+    }
   }
 
   Sketch = (p: p5) => {
@@ -62,7 +75,9 @@ class Minimap extends React.Component<MinimapProps> {
   };
 
   componentDidMount() {
-    this.myP5 = new p5(this.Sketch, this.myRef.current);
+    if (typeof window !== 'undefined') {
+      this.myP5 = new p5(this.Sketch, this.myRef.current);
+    }
   }
 
   componentDidUpdate() {
