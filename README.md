@@ -1,6 +1,6 @@
-# Desert Adventure Game
+# Hack Club Arcade Game Jam
 
-Welcome to the Desert Adventure Game! This is an exciting and challenging game where you must navigate an ivory colored square across a desert background to reach civilization.
+Welcome to the Hack Club Arcade Game Jam! This is an exciting and challenging game where you must navigate an ivory colored square across a desert background to reach civilization.
 
 ## Running the Game
 
@@ -37,23 +37,42 @@ The minimap helps players navigate the desert by providing a smaller, zoomed-out
 
 The minimap is automatically displayed at the top left corner of the screen when the game starts. Players can use the minimap to see their position and the locations of the black circles in relation to the game area. The minimap updates in real-time as the player moves and the game progresses.
 
-## Installation and Usage
+## Installation
 
-To install and use `p5.js` and `three.js` in your project, follow these steps:
+To install and run the project, follow these steps:
 
-1. Install the libraries using npm:
+1. Clone the repository:
    ```bash
-   npm install p5 three
+   git clone https://github.com/SkywardSyntax/HackClubArcadeGameJam.git
    ```
 
-2. Import the libraries in your JavaScript files:
-   ```javascript
-   import p5 from 'p5';
-   import * as THREE from 'three';
+2. Navigate to the project directory:
+   ```bash
+   cd HackClubArcadeGameJam
    ```
 
-3. Use the libraries to create your sketches and 3D scenes as needed.
+3. Install the dependencies:
+   ```bash
+   npm install
+   ```
 
-## Browser Environment
+4. Run the project:
+   ```bash
+   npm run dev
+   ```
 
-To ensure the game runs correctly, make sure you are running it in a browser environment. The game relies on the `window` object, which is only available in browsers. If you encounter a `ReferenceError: window is not defined` error, it means the game is being run in a non-browser environment. Ensure you are running the game in a browser to avoid this issue.
+## Usage
+
+To play the game, open your browser and navigate to the local server address provided by the development server (usually `http://localhost:3000`). Use the arrow keys to move the ivory colored square and avoid the black circles.
+
+## Contributing
+
+We welcome contributions to the project! If you would like to contribute, please follow these guidelines:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Make your changes and commit them with clear and descriptive commit messages.
+4. Push your changes to your forked repository.
+5. Open a pull request to the main repository with a description of your changes.
+
+Thank you for contributing!
