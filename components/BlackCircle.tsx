@@ -39,25 +39,36 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
     };
   }
 
-  pulsateIvorySquare = (p: p5) => {
+  pulsateBlackCircles = (p: p5) => {
     const proximityThreshold = 100;
-    let isCloseToBlackCircle = false;
+    let isCloseToIvorySquare = false;
 
     if (this.state.circles) {
       this.state.circles.forEach((circle) => {
         const distance = p.dist(this.state.playerPosition.x, this.state.playerPosition.y, circle.x, circle.y);
         if (distance < proximityThreshold) {
-          isCloseToBlackCircle = true;
+          isCloseToIvorySquare = true;
         }
       });
     }
 
-    if (isCloseToBlackCircle) {
+    if (isCloseToIvorySquare) {
       const time = p.millis() / 1000;
       const pulsateFactor = 1 + 0.1 * p.sin(time * 2 * p.PI);
       this.setState({ size: 50 * pulsateFactor });
     } else {
       this.setState({ size: 50 });
+    }
+  };
+
+  jumpIvorySquare = (p: p5) => {
+    if (this.state.keysPressed['j']) {
+      this.setState((prevState) => ({
+        playerPosition: {
+          x: prevState.playerPosition.x,
+          y: prevState.playerPosition.y - 50
+        }
+      }));
     }
   };
 
@@ -142,7 +153,8 @@ class BlackCircles extends React.Component<{}, BlackCirclesState> {
           }
         }));
 
-        this.pulsateIvorySquare(p);
+        this.pulsateBlackCircles(p);
+        this.jumpIvorySquare(p);
 
         // Ensure no more than 10 black circles are on the screen at any time
         if (this.state.circles.length > 10) {

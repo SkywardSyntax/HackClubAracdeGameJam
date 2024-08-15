@@ -66,6 +66,17 @@ class IvorySquare extends React.Component<Props, State> {
     }
   };
 
+  jumpIvorySquare = (p: p5) => {
+    if (this.state.keysPressed['j']) {
+      this.setState((prevState) => ({
+        position: {
+          x: prevState.position.x,
+          y: prevState.position.y - 50
+        }
+      }));
+    }
+  };
+
   Sketch = (p: p5) => {
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
@@ -79,6 +90,7 @@ class IvorySquare extends React.Component<Props, State> {
         p.translate(-this.state.cameraOffset.x, -this.state.cameraOffset.y);
 
         this.pulsateIvorySquare(p);
+        this.jumpIvorySquare(p);
 
         p.fill('#F5F5DC');
         p.noStroke();
