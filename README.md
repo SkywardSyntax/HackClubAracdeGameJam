@@ -37,6 +37,12 @@ The minimap helps players navigate the desert by providing a smaller, zoomed-out
 
 The minimap is automatically displayed at the top left corner of the screen when the game starts. Players can use the minimap to see their position and the locations of the black circles in relation to the game area. The minimap updates in real-time as the player moves and the game progresses.
 
+## Demo
+
+The `Demo` file is an image file used in the game. It is located in the `root` directory of the project. The purpose of the `Demo` file is to provide a visual representation of a specific element in the game.
+
+![demo.png](demo.png)
+
 ## Installation
 
 To install and run the project, follow these steps:
