@@ -84,5 +84,5 @@ We welcome contributions to the project! If you would like to contribute, please
 Thank you for contributing!
 
 ## Play The Demo!
-please visit http://40.76.46.99:3000 to play the game
+Please visit http://40.76.46.99:3000 to play the game
 
